@@ -1,18 +1,18 @@
 SELECT DISTINCT
-    
+
     /* PROMOTOR*/
      age.age_id                                                                               AS "Qtd Promotor"
     , age.age_name                                                                            AS "Promotor"
     , age.e_888                                                                               AS "Responsavel"
     , age.e_889                                                                               AS "Regional"
     , age.age_lastgeoposition                                                                 AS "Geo Promotor"
-    
+
      /* TAREFAS */
     , tsk.tsk_id
     , tsk.tsk_situation                                                                       AS "Situacao da Tarefa"
     , tsk.tsk_scheduleinitialdatehour::DATE                                                   AS "Periodo"
     , TO_CHAR(tsk.tsk_scheduleinitialdatehour::DATE, 'DD/MM/YYYY')                            AS data_prevista
-              
+
     , TO_TIMESTAMP(ie.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')                                 AS "Início do Expediente"
     , TO_TIMESTAMP(si.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')                                 AS "Saída do Intervalo"
     , TO_TIMESTAMP(ri.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')                                 AS "Retorno do Intervalo"
@@ -23,8 +23,11 @@ SELECT DISTINCT
     , extract(epoch FROM tsk.tsk_realinitialdatehour::TIME)/3600                              AS horario_inicial
     , extract(epoch FROM tsk.tsk_lastexecutiondatehour::TIME)/3600                            AS horario_final
 
-
-
+    , extract(epoch FROM (
+        (TO_TIMESTAMP(si.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS') - TO_TIMESTAMP(ie.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS'))
+            +
+        (TO_TIMESTAMP(fe.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS') - TO_TIMESTAMP(ri.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS'))
+    )::TIME)/3600 AS tempo_trabalhado
 
 FROM  u13408.dbout_task                                tsk
 LEFT JOIN u13408.dbout_agent                           age             ON (tsk.age_id = age.age_id)
