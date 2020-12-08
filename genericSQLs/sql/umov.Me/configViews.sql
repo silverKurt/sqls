@@ -1,0 +1,1 @@
+select dbout_setup_views();
