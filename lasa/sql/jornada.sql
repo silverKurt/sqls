@@ -13,10 +13,10 @@ SELECT DISTINCT
     , tsk.tsk_scheduleinitialdatehour::DATE                                                   AS "Periodo"
     , TO_CHAR(tsk.tsk_scheduleinitialdatehour::DATE, 'DD/MM/YYYY')                            AS data_prevista
               
-    , ie.e_data_e_hora                                                                        AS "Início do Expediente"
-    , si.e_data_e_hora                                                                        AS "Saída do Intervalo"
-    , ri.e_data_e_hora                                                                        AS "Retorno do Intervalo"
-    , fe.e_data_e_hora                                                                        AS "Fim do Expediente"
+    , TO_TIMESTAMP(ie.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')                                 AS "Início do Expediente"
+    , TO_TIMESTAMP(si.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')                                 AS "Saída do Intervalo"
+    , TO_TIMESTAMP(ri.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')                                 AS "Retorno do Intervalo"
+    , TO_TIMESTAMP(fe.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')                                 AS "Fim do Expediente"
 
     , extract(epoch FROM tsk.tsk_realinitialdatehour::TIME)/3600                              AS horario_ini
     , extract(epoch FROM tsk.tsk_lastexecutiondatehour::TIME)/3600                            AS horario_fim
