@@ -1,0 +1,16 @@
+WITH
+MEMBER [Measures].[ating] AS
+    iif((isEmpty([Measures].[litros]) OR isEmpty([Measures].[litros_AA])), NULL, (([Measures].[litros] / [Measures].[litros_AA]) - 1.0)), $caption = "% de Atingimento", FORMAT_STRING = Iif((([Measures].[ating]) > (0.0)), "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc3\.gif", "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc1\.gif")
+MEMBER [dataemissao.(Mes)].[TOTAL] AS
+	[dataemissao.(Mes)].[Todos]
+MEMBER [Measures].[Ano Anterior] AS
+    SUM([dataemissao.(Mes)].[Todos].Children, [Measures].[litros_AA])
+MEMBER [Measures].[Ano Atual] AS
+    SUM([dataemissao.(Mes)].[Todos].Children, [Measures].[litros])
+MEMBER [Measures].[atingtot] AS
+    iif((isEmpty([Measures].[Ano Atual]) OR isEmpty([Measures].[Ano Anterior])), NULL, (([Measures].[Ano Atual] / [Measures].[Ano Anterior]) - 1.0)), $caption = "% de Atingimento", FORMAT_STRING = Iif((([Measures].[atingtot]) > (0.0)), "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc3\.gif", "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc1\.gif")
+SELECT
+NON EMPTY UNION(NonEmptyCrossJoin([dataemissao.(Mes)].[Todos].Children, {[Measures].[litros_AA], [Measures].[litros], [Measures].[ating]}), NonEmptyCrossJoin([dataemissao.(Mes)].[TOTAL], {[Measures].[Ano Atual], [Measures].[Ano Anterior], [Measures].[atingtot]})) ON COLUMNS,
+NON EMPTY [fornecedor].[Todos].Children ON ROWS
+FROM [ComprasporFornecedor]
+WHERE {([BIMFdataemissao.CurrentYear])}

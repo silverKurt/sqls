@@ -1,0 +1,5 @@
+SELECT
+NON EMPTY {[Measures].[VlrMercadoria], [Measures].[VlrTotalPedido]} ON COLUMNS,
+NON EMPTY NonEmptyCrossJoin([PeriodoCadastro.(Dia)].[Todos].Children, NonEmptyCrossJoin([OrdemdeCompra].[Todos].Children, NonEmptyCrossJoin([Pedido].[Todos].Children, NonEmptyCrossJoin([Cliente].[Todos].Children, NonEmptyCrossJoin([ControleDesc].[Todos].Children, NonEmptyCrossJoin([PeriodoProgramado.(Dia)].[Todos].Children, NonEmptyCrossJoin([PeriodoEntrega.(Dia)].[Todos].Children, [PeriodoEntregaPrev.(Dia)].[Todos].Children))))))) ON ROWS
+FROM [Pedidos]
+WHERE NonEmptyCrossJoin({([AgrupamentoCliente].[LEROY MERLIN MATRIZ (000632)])}, ([PeriodoCadastroFiltro.(Completo)].[Todos].[2020].[S2].[Q3].[M9] : [PeriodoCadastroFiltro.(Completo)].[Todos].[2020].[S2].[Q4].[M10]))

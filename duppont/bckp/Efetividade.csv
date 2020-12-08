@@ -1,0 +1,21 @@
+periodo;id_setor;setor;id_zona_vendas;zona_vendas;id_representante;representante;clientes_programados_do_dia;clientes_compradores_do_dia;clientes_fora_de_rota;efetividade
+27/08/2020;1000;SETOR A                       ;1001;FA01                          ;000033;FABIO MURILO MAUS             ;35;35;3;92
+27/08/2020;1000;SETOR A                       ;1002;FA02                          ;000033;FABIO MURILO MAUS             ;45;42;4;86
+27/08/2020;1000;SETOR A                       ;1003;FA03                          ;000033;FABIO MURILO MAUS             ;53;45;1;83
+27/08/2020;1000;SETOR A                       ;1004;FA04                          ;000033;FABIO MURILO MAUS             ;37;36;2;92
+27/08/2020;1000;SETOR A                       ;1005;FA05                          ;000033;FABIO MURILO MAUS             ;39;39;3;93
+27/08/2020;1000;SETOR A                       ;1006;FA06                          ;000033;FABIO MURILO MAUS             ;53;48;7;80
+27/08/2020;1000;SETOR A                       ;1007;FA07                          ;000033;FABIO MURILO MAUS             ;46;49;8;91
+27/08/2020;1000;SETOR A                       ;1008;FA08                          ;000033;FABIO MURILO MAUS             ;45;39;0;87
+27/08/2020;2000;SETOR B                       ;2001;FB01                          ;000156;UILIAN RAFAEL T DOS SANTOS    ;48;36;1;73
+27/08/2020;2000;SETOR B                       ;2002;FB02                          ;000156;UILIAN RAFAEL T DOS SANTOS    ;41;45;13;83
+27/08/2020;2000;SETOR B                       ;2003;FB03                          ;000156;UILIAN RAFAEL T DOS SANTOS    ;43;41;5;85
+27/08/2020;2000;SETOR B                       ;2004;FB04                          ;000156;UILIAN RAFAEL T DOS SANTOS    ;45;43;2;91
+27/08/2020;2000;SETOR B                       ;2005;FB05                          ;000156;UILIAN RAFAEL T DOS SANTOS    ;29;28;4;85
+27/08/2020;2000;SETOR B                       ;2006;FB06                          ;000156;UILIAN RAFAEL T DOS SANTOS    ;44;42;4;88
+27/08/2020;2000;SETOR B                       ;2007;FB07                          ;000156;UILIAN RAFAEL T DOS SANTOS    ;39;29;1;73
+27/08/2020;5000;TELEVENDAS                    ;5001;FTV1                          ;000261;PATRICIA LEITE LARA           ;44;31;1;69
+27/08/2020;5000;TELEVENDAS                    ;5002;FTV2                          ;000261;PATRICIA LEITE LARA           ;67;60;8;80
+27/08/2020;5000;TELEVENDAS                    ;5003;FTV3                          ;000261;PATRICIA LEITE LARA           ;66;45;5;63
+27/08/2020;5000;TELEVENDAS                    ;5004;FTV4                          ;000261;PATRICIA LEITE LARA           ;66;47;1;70
+27/08/2020;5000;TELEVENDAS                    ;5005;FTV5                          ;000261;PATRICIA LEITE LARA           ;48;24;1;49

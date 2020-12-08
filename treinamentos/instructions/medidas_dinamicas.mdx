@@ -1,0 +1,7 @@
+<#if filters['Periodo']??>
+    Aggregate(
+        {FixedParallelPeriod([BIMFperiodo.(Completo)].[Ano], 1, ${filters['Periodo'].first}.Item(0)) : FixedParallelPeriod([BIMFperiodo.(Completo)].[Ano], 1, ${filters['Periodo'].last}.Item(0))}, [Measures].[vlrtotalfatura]
+    )
+<#else>
+    Iif(IsEmpty([Measures].[vlrtotalfatura]), NULL, 0)
+</#if>

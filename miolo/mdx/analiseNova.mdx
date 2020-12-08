@@ -1,0 +1,8 @@
+WITH
+MEMBER [Measures].[R$ Unit.] AS
+    ([Measures].[Vlr Bruto] / [Measures].[QtdeUnitaria])
+SELECT
+NON EMPTY Union(NonEmptyCrossJoin({[TipoFrente].[C]}, {[Measures].[Vlr Bruto], [Measures].[QtdeUnitaria], [Measures].[R$ Unit.]}), NonEmptyCrossJoin({[TipoFrente].[F]}, {[Measures].[Vlr Bruto], [Measures].[QtdeUnitaria], [Measures].[R$ Unit.]})) ON COLUMNS,
+NON EMPTY {([ClienteAgrupador].[Todos], [Apresentacao].[Todos])} ON ROWS
+FROM [FaturamentoResumido]
+WHERE NonEmptyCrossJoin(NonEmptyCrossJoin({{[BIMFTipoFaturamento].[DEVOLUCAO], [BIMFTipoFaturamento].[FATURAMENTO]}}, [BIMFNovosCanaisGeograficos].[VINTAGE/SUNNY DAYS]), ([BIMFPeriodoEmissao.(Completo)].[2020].[S2].[Q3].[M9] : [BIMFPeriodoEmissao.(Completo)].[2020].[S2].[Q3].[M9]))

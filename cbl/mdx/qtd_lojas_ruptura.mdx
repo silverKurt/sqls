@@ -1,0 +1,5 @@
+SELECT
+NON EMPTY {[Measures].[QtdPDVs]} ON COLUMNS,
+NON EMPTY [Periodo.(Mes)].[Todos].Children ON ROWS
+FROM [PaineldeRupturaMixdeProdutos]
+WHERE {([BIMFPeriodo.LastThreeMonths])}

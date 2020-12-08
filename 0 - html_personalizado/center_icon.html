@@ -1,0 +1,48 @@
+<style>
+    .esquerda {
+        left: 79px;
+        top: calc(50% - 59px);
+        position: absolute;
+        padding: 11px 40px;
+        width: 421px;
+        z-index: 999;
+    }
+
+    .direita {
+        right: 0px;
+        top: calc(40% - 56px);
+        position: absolute;
+        padding: 32px 32px;
+    }
+
+    .yellow {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        margin: 0px;
+        background-color: #1f974d;
+        width: 240px;
+        height: 100%;
+    }
+
+    @media screen and (max-width: 800px) {
+        .direita {
+            display: none;
+        }
+
+        .esquerda {
+            top: calc(50% - 46px);
+            width: 300px;
+        }
+
+        .yellow {
+            width: 186px;
+        }
+
+    }
+</style>
+
+<img src="https://i.ibb.co/ccsSj5f/logo-sertaneja.png" alt="" class="esquerda">
+<img src="https://static.wixstatic.com/media/93c381_182bc4360e124fc7a926b87227c3858a~mv2.png" alt="" class="direita">
+<div class="yellow" wfd-id="1"></div>
+<div style="margin: 0px; background-color: #226e46; width: 100%; height: 100%;" wfd-id="0"></div>

@@ -1,0 +1,13 @@
+WITH
+MEMBER [Periodo.(Dia)].[Dia Anterior A] AS
+    ([DiaAtualCompleto].Item(0.0).Lag(2.0), [PeriodoFiltro.(Completo)].[Todos])
+MEMBER [Periodo.(Dia)].[Dia Anterior] AS
+    ([DiaAtualCompleto].Item(0.0).Lag(1.0), [PeriodoFiltro.(Completo)].[Todos])
+MEMBER [Periodo.(Dia)].[Dia Sata] AS
+    iif(IsEmpty(([Periodo.(Dia)].[Dia Anterior], [PDV].[Todos], [Measures].[% Ruptura])), [Periodo.(Dia)].[Dia Anterior A], [Periodo.(Dia)].[Dia Anterior])
+SELECT
+NON EMPTY NonEmptyCrossJoin({[Measures].[% Ruptura]}, [Periodo.(Dia)].[Todos].Children) ON COLUMNS,
+NON EMPTY TopCount(Order([PDV].[Todos].Children, ([Measures].[% Ruptura], [Periodo.(Dia)].[Dia Sata]), DESC), 10.0, ([Measures].[% Ruptura], [Periodo.(Dia)].[Dia Sata])) ON ROWS
+FROM [PaineldeRupturacomMIX]
+WHERE {([BIMFPeriodo.(Completo)].[Dia].[08/09/2020] : [BIMFPeriodo.(Completo)].[Dia].[15/09/2020])}
+

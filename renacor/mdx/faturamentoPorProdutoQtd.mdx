@@ -1,0 +1,26 @@
+WITH
+MEMBER [Measures].[VlrAA] AS
+    Aggregate({(FixedParallelPeriod([BIMFperiodo.(Completo)].[Ano], 1.0, [BIMFperiodo.CurrentYear].Item(0.0)) : FixedParallelPeriod([BIMFperiodo.(Completo)].[Ano], 1.0, [BIMFperiodo.CurrentYear].Item(0.0)))}, [Measures].[Vlr]), FORMAT_STRING = "Currency", $caption = "Vlr Ano Anterior"
+MEMBER [Measures].[VlrMA] AS
+    Aggregate({(FixedParallelPeriod([BIMFperiodo.(Completo)].[Mes], 1.0, [BIMFperiodo.CurrentYear].Item(0.0)) : FixedParallelPeriod([BIMFperiodo.(Completo)].[Mes], 1.0, [BIMFperiodo.CurrentYear].Item(0.0)))}, [Measures].[Vlr]), $caption = "Vlr Mês Anterior"
+MEMBER [Measures].[VarVlrAA] AS
+    Iif(([Measures].[VlrAA] > 0.0), (([Measures].[vlr] / [Measures].[VlrAA]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[VarVlrAA] >= 0.0), "|0.00%|style=green", "|0.00%|style=red"), $caption = "% Var. Vlr AA"
+MEMBER [Measures].[Qtd Clientes MA] AS
+    Aggregate({(FixedParallelPeriod([BIMFperiodo.(Completo)].[Mes], 1.0, [BIMFperiodo.CurrentYear].Item(0.0)) : FixedParallelPeriod([BIMFperiodo.(Completo)].[Mes], 1.0, [BIMFperiodo.CurrentYear].Item(0.0)))}, [Measures].[qtdcliente])
+MEMBER [Measures].[Preco Medio MA] AS
+    Aggregate({(FixedParallelPeriod([BIMFperiodo.(Completo)].[Mes], 1.0, [BIMFperiodo.CurrentYear].Item(0.0)) : FixedParallelPeriod([BIMFperiodo.(Completo)].[Mes], 1.0, [BIMFperiodo.CurrentYear].Item(0.0)))}, [Measures].[PrecoMedio])
+MEMBER [Measures].[ating] AS
+    iif((isEmpty([Measures].[qtdlt]) OR isEmpty([Measures].[qtd_litros_AA2])), NULL, (([Measures].[qtdlt] / [Measures].[qtd_litros_AA2]) - 1.0)), $caption = "% de Atingimento", FORMAT_STRING = Iif((([Measures].[ating]) > (0.0)), "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc3\.gif", "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc1\.gif")
+MEMBER [periodo.(Mes)].[TOTAL] AS
+	[periodo.(Mes)].[Todos]
+MEMBER [Measures].[Ano Anterior] AS
+    SUM([periodo.(Mes)].[Todos].Children, [Measures].[qtd_litros_AA])
+MEMBER [Measures].[Ano Atual] AS
+    SUM([periodo.(Mes)].[Todos].Children, [Measures].[qtdlt])
+MEMBER [Measures].[atingtot] AS
+    iif((isEmpty([Measures].[Ano Atual]) OR isEmpty([Measures].[Ano Anterior])), NULL, (([Measures].[Ano Atual] / [Measures].[Ano Anterior]) - 1.0)), $caption = "% de Atingimento", FORMAT_STRING = Iif((([Measures].[atingtot]) > (0.0)), "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc3\.gif", "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc1\.gif")
+SELECT
+NON EMPTY UNION(NonEmptyCrossJoin([periodo.(Mes)].[Todos].Children, {[Measures].[qtd_litros_AA], [Measures].[qtdlt], [Measures].[ating]}), NonEmptyCrossJoin([periodo.(Mes)].[TOTAL], {[Measures].[Ano Atual], [Measures].[Ano Anterior], [Measures].[atingtot]})) ON COLUMNS,
+NON EMPTY Filter(NonEmptyCrossJoin([produto].[Todos].Children, [fabricante].[Todos].Children), ([Measures].[qtdlt] <> 0.0)) ON ROWS
+FROM [FaturamentoProduto]
+WHERE NonEmptyCrossJoin({([BIMFlinhaproduto].[CORANTES])}, [BIMFperiodo.CurrentYear])

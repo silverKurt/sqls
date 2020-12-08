@@ -1,0 +1,2 @@
+SELECT DISTINCT split_part(initcap(lower(CAST("representante" AS TEXT))), ' ', 1)::TEXT || ' ' || regexp_replace(SUBSTRING(initcap(lower(CAST("representante" AS TEXT))), length(split_part(initcap(lower(CAST("representante" AS TEXT))), ' ', 1))+2), '([a-z ])+', '. ', 'g') AS "Nome Abreviado"
+FROM "renacor"."fat_renacor_FaturamentoBase"

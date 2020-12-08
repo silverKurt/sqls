@@ -1,0 +1,32 @@
+WITH
+MEMBER [Measures].[Qtd Clientes AA] AS
+    Iif(IsEmpty([Measures].[qtdclientes]), NULL, 0.0), $caption = "Qtd Clientes AA (Dinâmica)"
+MEMBER [Measures].[Var. Clientes Ano] AS
+    iif(([Measures].[Qtd Clientes AA] > 0.0), (([Measures].[QtdClientes] / [Measures].[Qtd Clientes AA]) - 1.0), NULL), FORMAT_STRING = "Percent", $caption = "Var % Clientes AA"
+MEMBER [Measures].[VlrMA] AS
+    Iif(IsEmpty([Measures].[Vlr]), NULL, 0.0), FORMAT_STRING = "Currency", $caption = "Vlr Mês Anterior (Dinâmica)"
+MEMBER [Measures].[VlrAA] AS
+    Iif(IsEmpty([Measures].[Vlr]), NULL, 0.0), FORMAT_STRING = "Currency", $caption = "Vlr Ano Anterior (Dinâmica)"
+MEMBER [Measures].[Var Vlr MA %] AS
+    iif(([Measures].[VlrMA] > 0.0), (([Measures].[Vlr] / [Measures].[VlrMA]) - 1.0), NULL), FORMAT_STRING = "Percent", $caption = "Var. Vlr MA (Dinâmica)"
+MEMBER [Measures].[Var Vlr AA %] AS
+    iif(([Measures].[VlrAA] > 0.0), (([Measures].[Vlr] / [Measures].[VlrAA]) - 1.0), NULL), FORMAT_STRING = "Percent", $caption = "Var. Vlr AA (Dinâmica)"
+MEMBER [Measures].[QtdMA] AS
+    Iif(IsEmpty([Measures].[Qtd]), NULL, 0.0), FORMAT_STRING = "Standard", $caption = "Qtd Mês Anterior (Dinâmica)"
+MEMBER [Measures].[QtdAA] AS
+    Iif(IsEmpty([Measures].[Qtd]), NULL, 0.0), FORMAT_STRING = "Standard", $caption = "Qtd Ano Anterior (Dinâmica)"
+MEMBER [Measures].[Var Qtd MA %] AS
+    iif(([Measures].[QtdMA] > 0.0), (([Measures].[Qtd] / [Measures].[QtdMA]) - 1.0), NULL), FORMAT_STRING = "Percent", $caption = "Var. Qtd MA (Dinâmica)"
+MEMBER [Measures].[Var Qtd AA %] AS
+    iif(([Measures].[QtdAA] > 0.0), (([Measures].[Qtd] / [Measures].[QtdAA]) - 1.0), NULL), FORMAT_STRING = "Percent", $caption = "Var. Qtd AA (Dinâmica)"
+MEMBER [PeriodoFaturamento.(Mes)].[MÉDIA] AS
+    (([PeriodoFaturamento.(Mes)].[Todos]) / [Measures].[MesescomRegistro])
+MEMBER [Measures].[Dias Uteis AA] AS
+    Iif(IsEmpty([Measures].[Dias Uteis]), NULL, 0.0), $caption = "Dias Uteis AA"
+MEMBER [Measures].[qtddistribuicaofaixas] AS
+    Iif(IsEmpty([Measures].[qtddistribuicao]), NULL, 0.0), $caption = "Qtd Distribuição AA (Faixas)"
+SELECT
+NON EMPTY {[Measures].[vlrmeta], [Measures].[qtd], [Measures].[AtingVendaPerc]} ON COLUMNS,
+NON EMPTY UNION([PeriodoFaturamento.(Mes)].[Todos].Children, [PeriodoFaturamento.(Mes)].[MÉDIA]) ON ROWS
+FROM [MetaxFaturamentoNovo]
+WHERE {([BIMFPeriodoFaturamento.(Completo)].[Todos].[2019].[S2].[Q3].[M8] : [BIMFPeriodoFaturamento.(Completo)].[Todos].[2020].[S2].[Q3].[M8])}

@@ -1,0 +1,4 @@
+jdbc:postgresql://ro.bimachine:5432/bi_machine_data_origins
+
+alimentosv2
+SWpkejlHZHVWV2JweFdZ

@@ -1,0 +1,4 @@
+SELECT
+{[Measures].[VlrMercadoria]} ON COLUMNS
+FROM [PedidosemCarteira]
+WHERE NonEmptyCrossJoin(NonEmptyCrossJoin({[TipoPedidoCompleto].[Venda Consumidor Final], [TipoPedidoCompleto].[Normal], [TipoPedidoCompleto].[Venda a Ordem]}, ([Controle].[41])), [BIMFPeriodoProgramado.CurrentMonth])

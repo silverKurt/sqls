@@ -1,0 +1,5 @@
+SELECT
+NON EMPTY NonEmptyCrossJoin({[Measures].[% Ruptura Geral]}, [Periodo.(Mes)].[Todos].Children) ON COLUMNS,
+NON EMPTY Order({[PDVRegional].[Todos].Children}, [Measures].[% Ruptura Geral], DESC) ON ROWS
+FROM [PaineldeRupturaMixdeProdutos]
+WHERE {([BIMFPeriodo.LastThreeMonths])}

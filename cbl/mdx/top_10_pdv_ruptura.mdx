@@ -1,0 +1,8 @@
+WITH
+MEMBER [Periodo.(Mes)].[Primeiro] AS
+    [PeriodoMesAtual].Item(0)
+SELECT 
+NON EMPTY NonEmptyCrossJoin({[Measures].[% Ruptura]}, [Periodo.(Mes)].[Todos].Children) ON COLUMNS, 
+NON EMPTY TopCount(Order([PDV].[Todos].Children, [Measures].[% Ruptura], DESC), 10.0, ([Measures].[% Ruptura], [Periodo.(Mes)].[Primeiro])) ON ROWS 
+FROM [PaineldeRupturacomMIX] 
+WHERE [BIMFPeriodo.LastThreeMonths]

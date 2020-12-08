@@ -1,0 +1,28 @@
+WITH
+MEMBER [Material].[TOTAL] AS
+    [Material].[Todos]
+MEMBER [Measures].[Total Consumo] AS
+    (((([Measures].[ConsumoMedio1] + [Measures].[ConsumoMedio2]) + ([Measures].[ConsumoMedio3])) + ([Measures].[ConsumoMedio4])) + ([Measures].[ConsumoMedio5])), FORMAT_STRING = "Standard"
+MEMBER [Measures].[Qtd Demanda c/Liberação] AS
+    ([StatusLiberacao].[C/LIBERAÇÃO], [Measures].[QtdeDemandaLiberada]), FORMAT_STRING = "#,##0.00"
+MEMBER [Measures].[Qtd Demanda S/Liberação] AS
+    ([StatusLiberacao].[S/LIBERAÇÃO], [Measures].[QtdeDemandaLiberada]), FORMAT_STRING = "#,##0.00"
+MEMBER [Measures].[Qtde Demanda Total] AS
+    [Measures].[QtdeDemandaLiberada], FORMAT_STRING = "#,##0.00"
+MEMBER [Measures].[Saldo] AS
+    (([Measures].[SaldoCAsPlanejamento] + [Measures].[SaldoOC]) - [Measures].[Qtd Demanda c/Liberação]), FORMAT_STRING = Iif(([Measures].[Saldo] > [Measures].[EstoqueSeguranca]), "|0|style=green", "|0|style=red")
+MEMBER [Measures].[Giro] AS
+    iif(IsEmpty([Measures].[EstoqueSeguranca]) OR [Measures].[EstoqueSeguranca] = 0, 0,(([Measures].[SaldoCAsPlanejamento] - [Measures].[Qtd Demanda c/Liberação]) / [Measures].[EstoqueSeguranca])), FORMAT_STRING = "#,##0.00"
+MEMBER [Measures].[Verificar] AS
+    Iif(([Measures].[Giro] < 0.4), "ANTECIPAR", "")
+
+MEMBER [Measures].[Comprar] AS
+    Iif(([Measures].[Saldo] < [Measures].[EstoqueSeguranca]), "COMPRAR", "")
+
+MEMBER [Measures].[Saldo sem OC] AS
+    (([Measures].[SaldoCAsPlanejamento]) - [Measures].[Qtd Demanda c/Liberação]), FORMAT_STRING = Iif(([Measures].[Saldo sem OC] > [Measures].[EstoqueSeguranca]), "|0|style=green", "|0|style=red")
+SELECT
+NON EMPTY {[Measures].[SaldoCAsPlanejamento], [Measures].[SaldoOC], [Measures].[Qtd Demanda c/Liberação], [Measures].[Qtd Demanda S/Liberação], [Measures].[Qtde Demanda Total], [Measures].[EstoqueSeguranca], [Measures].[Saldo], [Measures].[Saldo sem OC], [Measures].[Giro], [Measures].[Verificar], [Measures].[Comprar], [Measures].[JanAA], [Measures].[FevAA], [Measures].[MarAA], [Measures].[AbriAA], [Measures].[MaiAA], [Measures].[JunAA], [Measures].[JulAA], [Measures].[AgoAA], [Measures].[SetAA], [Measures].[OutAA], [Measures].[NovAA], [Measures].[DezAA], [Measures].[Jan], [Measures].[Fev], [Measures].[Mar], [Measures].[Abri], [Measures].[Mai], [Measures].[Jun], [Measures].[Jul], [Measures].[Ago], [Measures].[Set], [Measures].[Out], [Measures].[Nov], [Measures].[Dez]} ON COLUMNS,
+NON EMPTY UNION([Material].[TOTAL], Filter([Material].[Todos].Children, [Measures].[SaldoCAsPlanejamento] > 0)) ON ROWS
+FROM [MRPReciclados]
+

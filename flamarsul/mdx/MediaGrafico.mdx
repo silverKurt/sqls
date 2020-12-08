@@ -1,0 +1,40 @@
+WITH
+MEMBER [Measures].[VlrAA] AS
+       Aggregate({FixedParallelPeriod([BIMFperiodo.(Completo)].[Ano], 1, [BIMFperiodo.(Completo)].[Todos].[2019].[S2].[Q4].[M10].Item(0)) : FixedParallelPeriod([BIMFperiodo.(Completo)].[Ano], 1, [BIMFperiodo.(Completo)].[Todos].[2020].[S2].[Q4].[M10].Item(0))}, [Measures].[vlr])
+, FORMAT_STRING = "Currency", $caption = "Vlr AA"
+MEMBER [Measures].[VarVlrAA] AS
+    Iif([Measures].[VlrAA] > 0, ([Measures].[vlr]/[Measures].[VlrAA])-1, NULL), FORMAT_STRING = Iif([Measures].[VarVlrAA]>= 0, "|0.00%|style=green", "|0.00%|style=red"), $caption = "% Var. Vlr AA"
+MEMBER [Measures].[Qtd Clientes AA] AS
+        Aggregate(
+        {FixedParallelPeriod([BIMFperiodo.(Completo)].[Ano], 1, [BIMFperiodo.(Completo)].[Todos].[2019].[S2].[Q4].[M10].Item(0)) : FixedParallelPeriod([BIMFperiodo.(Completo)].[Ano], 1, [BIMFperiodo.(Completo)].[Todos].[2020].[S2].[Q4].[M10].Item(0))}
+        , [Measures].[qtdclientes]
+    )
+, $caption = "Qtd Clientes AA"
+MEMBER [Measures].[Qtd Cliente MA] AS
+        Aggregate(
+        {FixedParallelPeriod([BIMFperiodo.(Completo)].[Mes], 1, [BIMFperiodo.(Completo)].[Todos].[2019].[S2].[Q4].[M10].Item(0)) : FixedParallelPeriod([BIMFperiodo.(Completo)].[Mes], 1, [BIMFperiodo.(Completo)].[Todos].[2020].[S2].[Q4].[M10].Item(0))}
+        , [Measures].[qtdclientes]
+    )
+, $caption = "Qtd Cliente MA"
+MEMBER [Measures].[Preco Medio MA] AS
+        Aggregate(
+        {FixedParallelPeriod([BIMFperiodo.(Completo)].[Mes], 1, [BIMFperiodo.(Completo)].[Todos].[2019].[S2].[Q4].[M10].Item(0)) : FixedParallelPeriod([BIMFperiodo.(Completo)].[Mes], 1, [BIMFperiodo.(Completo)].[Todos].[2020].[S2].[Q4].[M10].Item(0))}
+        , [Measures].[PrecoMedio]
+    )
+, $caption = "Preco Medio MA"
+MEMBER [Measures].[qtdAA] AS
+       Aggregate({FixedParallelPeriod([BIMFperiodo.(Completo)].[Ano], 1, [BIMFperiodo.(Completo)].[Todos].[2019].[S2].[Q4].[M10].Item(0)) : FixedParallelPeriod([BIMFperiodo.(Completo)].[Ano], 1, [BIMFperiodo.(Completo)].[Todos].[2020].[S2].[Q4].[M10].Item(0))}, [Measures].[qtd])
+, $caption = "Qtd AA"
+MEMBER [Measures].[qtdprodutoscont1] AS
+    ([Measures].[qtdprodutoscont]), FORMAT_STRING = "0", $caption = "Qtde Produtos"
+MEMBER [Measures].[qtdprodutoscont2] AS
+    iif(([periodo.(Mes)].CurrentMember.Name = "MÉDIA"), AVG([periodo.(Mes)].[Todos].Children, iif(isEmpty([Measures].[qtdprodutoscont1]), NULL, Aggregate(FixedParallelPeriod([periodo.(Mes)].[Mes], 12.0, [periodo.(Mes)].CurrentMember), ([Measures].[qtdprodutoscont1], [BIMFperiodo.(Completo)].[Todos])))), iif(isEmpty([Measures].[qtdprodutoscont1]), NULL, Aggregate(FixedParallelPeriod([periodo.(Mes)].[Mes], 12.0, [periodo.(Mes)].CurrentMember), ([Measures].[qtdprodutoscont1], [BIMFperiodo.(Completo)].[Todos])))), $caption = "Qtde Produtos AA"
+MEMBER [Measures].[crescPercent] AS
+    Iif(IsEmpty([Measures].[qtdprodutoscont1]), NULL, (([Measures].[qtdprodutoscont1] / [Measures].[qtdprodutoscont2]) - 1.0)), Format_String = "0%", $caption = "% Cresc."
+MEMBER [periodo.(Mes)].[MÉDIA] AS
+    AVG([periodo.(Mes)].[Todos].Children)
+SELECT
+NON EMPTY {[Measures].[qtdprodutoscont1], [Measures].[qtdprodutoscont2], [Measures].[crescPercent]} ON COLUMNS,
+NON EMPTY UNION([periodo.(Mes)].[Todos].Children, [periodo.(Mes)].[MÉDIA]) ON ROWS
+FROM [FaturamentoProduto]
+WHERE NonEmptyCrossJoin({([BIMFperiodo.(Completo)].[Todos].[2019].[S2].[Q4].[M10] : [BIMFperiodo.(Completo)].[Todos].[2020].[S2].[Q4].[M10])}, [BIMFitema].[PROPRIO FLAMARSUL SINERGIA])

@@ -1,0 +1,5 @@
+SELECT
+NON EMPTY {[Measures].[% Ruptura Geral]} ON COLUMNS,
+NON EMPTY [Periodo.(Mes)].[Todos].Children ON ROWS
+FROM [PaineldeRupturacomMIX]
+WHERE {([BIMFPeriodo.LastThreeMonths])}

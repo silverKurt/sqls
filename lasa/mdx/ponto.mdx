@@ -1,0 +1,14 @@
+WITH
+MEMBER [Measures].[Indicador] AS
+    coalesceempty([Measures].[tempotrabalho], 1.0), FORMAT_STRING = Iif((([statusentrada].CurrentMember.Name = "NÃO OK") AND ([statussaida].CurrentMember.Name = "NÃO OK")), "||image=/resources/images/kpi/ball-red\.gif", Iif((([statusentrada].CurrentMember.Name) <> ([statussaida].CurrentMember.Name)), "||image=/resources/images/kpi/ball-yellow\.gif", "||image=/resources/images/kpi/green-ball\.gif"))
+MEMBER [Measures].[Inicio] AS
+    [Measures].[horaentrada], CELL_FORMATTER = "br.com.sol7.formatters.TimeFormatter"
+MEMBER [Measures].[Fim] AS
+    [Measures].[horasaida], CELL_FORMATTER = "br.com.sol7.formatters.TimeFormatter"
+MEMBER [Measures].[Trabalhado] AS
+    [Measures].[tempotrabalho], CELL_FORMATTER = "br.com.sol7.formatters.TimeFormatter"
+SELECT
+NON EMPTY {[Measures].[Inicio], [Measures].[Fim], [Measures].[Trabalhado], [Measures].[QtdPromotor], [Measures].[Indicador]} ON COLUMNS,
+NON EMPTY NonEmptyCrossJoin([Promotor].[Todos].Children, NonEmptyCrossJoin([dataprevista].[Todos].Children, NonEmptyCrossJoin([Responsavel].[Todos].Children, NonEmptyCrossJoin([PDV].[Todos].Children, NonEmptyCrossJoin([dataentrada.(Dia)].[Todos].Children, NonEmptyCrossJoin([statusentrada].[Todos].Children, NonEmptyCrossJoin([datasaida.(Dia)].[Todos].Children, [statussaida].[Todos].Children))))))) ON ROWS
+FROM [CheckineCheckout]
+WHERE NonEmptyCrossJoin({([BIMFperiodo.(Completo)].[Dia].[23/09/2020])}, [BIMFPromotor].[JULIANA EVARISTO DOS SANTOS])

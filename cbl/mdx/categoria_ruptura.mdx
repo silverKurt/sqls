@@ -1,0 +1,5 @@
+SELECT
+NON EMPTY NonEmptyCrossJoin({[Measures].[% Ruptura]}, {[ItemCategoriaCBL].[AROMATIZADO], [ItemCategoriaCBL].[IOGURTE], [ItemCategoriaCBL].[KIDS], [ItemCategoriaCBL].[LEITE FERMENTADO], [ItemCategoriaCBL].[LEITE PASTEURIZADO], [ItemCategoriaCBL].[LEITE UHT], [ItemCategoriaCBL].[PETIT]}) ON COLUMNS,
+NON EMPTY [Periodo.(Mes)].[Todos].Children ON ROWS
+FROM [PaineldeRupturacomMIX]
+WHERE {([BIMFPeriodo.LastThreeMonths])}
