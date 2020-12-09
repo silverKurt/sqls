@@ -43,8 +43,8 @@ SELECT DISTINCT
       t.age_id::TEXT     || 
       t.loc_id::TEXT     || 
       t.tsk_scheduleinitialdatehour::DATE::TEXT                 AS tsk_id
+    
     /* HISTORICO */
-
     , his.e_preco                                               AS "Preco"
     , his.e_produto_disponivel                                  AS "Produto Disponivel"
 
