@@ -41,27 +41,26 @@ GROUP BY 1
 	ORDER BY y."Cliente", y."periodo"
 )
 
--- Source: Faturamento Diarização
-SELECT *,
-	, CASE WHEN ((freq."Faixa de Frequência" = 'F5 - MAIS QUE 100 COMPRAS' OR freq."Faixa de Frequência" = 'F4 - ENTRE 51 E 100 COMPRAS') AND (rec."Faixa de Recência" = 'R5 - ATÉ 60 DIAS'))
+SELECT *
+	, CASE WHEN ((freq."Faixa de Frequência" = 'F5 - 12 vezes ou mais' OR freq."Faixa de Frequência" = 'F4 - 10 a 11 vezes') AND (freq."Faixa de Recência" = 'R5 - Últimos 30 Dias'))
 			THEN 'Clientes Campeões'
-		WHEN ((freq."Faixa de Frequência" = 'F3 - ENTRE 31 E 50 COMPRAS' OR freq."Faixa de Frequência" = 'F2 - ENTRE 11 E 30 COMPRAS') AND (rec."Faixa de Recência" = 'R5 - ATÉ 60 DIAS' OR rec."Faixa de Recência" = 'R4 - DE 61 A 120 DIAS'))
+		WHEN ((freq."Faixa de Frequência" = 'F3 - 6 a 9 vezes' OR freq."Faixa de Frequência" = 'F2 - 2 a 5 vezes') AND (freq."Faixa de Recência" = 'R5 - Últimos 30 Dias' OR freq."Faixa de Recência" = 'R4 - 31 A 60 Dias'))
 			THEN 'Clientes potencial de lealdade'
-		WHEN ((freq."Faixa de Frequência" = 'F1 - ATÉ 10 COMPRAS') AND (rec."Faixa de Recência" = 'R5 - ATÉ 60 DIAS')) --novos
+		WHEN ((freq."Faixa de Frequência" = 'F1 - 1 vez') AND (freq."Faixa de Recência" = 'R5 - Últimos 30 Dias')) --novos
 			THEN 'Clientes Novos'
-		WHEN ((freq."Faixa de Frequência" = 'F1 - ATÉ 10 COMPRAS') AND (rec."Faixa de Recência" = 'R4 - DE 61 A 120 DIAS')) --promissores
+		WHEN ((freq."Faixa de Frequência" = 'F1 - 1 vez') AND (freq."Faixa de Recência" = 'R4 - 31 A 60 Dias')) --promissores
 			THEN 'Clientes Promissores'
-		WHEN ((freq."Faixa de Frequência" = 'F5 - MAIS QUE 100 COMPRAS' OR freq."Faixa de Frequência" = 'F4 - ENTRE 51 E 100 COMPRAS') AND (rec."Faixa de Recência" = 'R4 - DE 61 A 120 DIAS' OR rec."Faixa de Recência" = 'R3 - DE 121 A 180 DIAS'))
+		WHEN ((freq."Faixa de Frequência" = 'F5 - 12 vezes ou mais' OR freq."Faixa de Frequência" = 'F4 - 10 a 11 vezes') AND (freq."Faixa de Recência" = 'R4 - 31 A 60 Dias' OR freq."Faixa de Recência" = 'R3 - 61 A 120 Dias'))
 			THEN 'Clientes Leais'
-		WHEN ((freq."Faixa de Frequência" = 'F3 - ENTRE 31 E 50 COMPRAS') AND (rec."Faixa de Recência" = 'R3 - DE 121 A 180 DIAS')) --atenção
+		WHEN ((freq."Faixa de Frequência" = 'F3 - 6 a 9 vezes') AND (freq."Faixa de Recência" = 'R3 - 61 A 120 Dias')) --atenção
 			THEN 'Clientes Precisam Atenção'
-		WHEN ((freq."Faixa de Frequência" = 'F1 - ATÉ 10 COMPRAS' OR freq."Faixa de Frequência" = 'F2 - ENTRE 11 E 30 COMPRAS') AND (rec."Faixa de Recência" = 'R3 - DE 121 A 180 DIAS'))
+		WHEN ((freq."Faixa de Frequência" = 'F1 - 1 vez' OR freq."Faixa de Frequência" = 'F2 - 2 a 5 vezes') AND (freq."Faixa de Recência" = 'R3 - 61 A 120 Dias'))
 			THEN 'Clientes em pré-hibernação'
-		WHEN ((freq."Faixa de Frequência" = 'F1 - ATÉ 10 COMPRAS' OR freq."Faixa de Frequência" = 'F2 - ENTRE 11 E 30 COMPRAS') AND (rec."Faixa de Recência" = 'R2 - DE 181 A 270 DIAS' OR rec."Faixa de Recência" = 'R1 - INATIVO'))
+		WHEN ((freq."Faixa de Frequência" = 'F1 - 1 vez' OR freq."Faixa de Frequência" = 'F2 - 2 a 5 vezes') AND (freq."Faixa de Recência" = 'R2 - 121 A 180 Dias' OR freq."Faixa de Recência" = 'R1 - 181 A 360 Dias'))
 			THEN 'Clientes Hibernando'
-		WHEN ((freq."Faixa de Frequência" = 'F3 - ENTRE 31 E 50 COMPRAS' OR freq."Faixa de Frequência" = 'F4 - ENTRE 51 E 100 COMPRAS') AND (rec."Faixa de Recência" = 'R2 - DE 181 A 270 DIAS' OR rec."Faixa de Recência" = 'R1 - INATIVO'))
+		WHEN ((freq."Faixa de Frequência" = 'F3 - 6 a 9 vezes' OR freq."Faixa de Frequência" = 'F4 - 10 a 11 vezes') AND (freq."Faixa de Recência" = 'R2 - 121 A 180 Dias' OR freq."Faixa de Recência" = 'R1 - 181 A 360 Dias'))
 			THEN 'Clientes em risco'
-		WHEN ((freq."Faixa de Frequência" = 'F5 - MAIS QUE 100 COMPRAS') AND (rec."Faixa de Recência" = 'R2 - DE 181 A 270 DIAS' OR rec."Faixa de Recência" = 'R1 - INATIVO'))
+		WHEN ((freq."Faixa de Frequência" = 'F5 - 12 vezes ou mais') AND (freq."Faixa de Recência" = 'R2 - 121 A 180 Dias' OR freq."Faixa de Recência" = 'R1 - 181 A 360 Dias'))
 			THEN 'Clientes não podemos perder'
 	ELSE 'fora de faixa' END AS "Faixa de RFV"
 FROM 
@@ -82,24 +81,23 @@ FROM
 	CAST(f."Unidade de Negocio" AS TEXT) AS "Unidade de Negocio",
 	CAST(f."GEO_CLIENTE" AS TEXT) AS "Geo Cliente",
     
-	--CASE WHEN DATE_TRUNC('MONTH', CAST(f."Periodo" AS DATE)) = DATE_TRUNC('MONTH', CAST(uf."Ultima Fatura" AS DATE)) THEN ''
     sc."status_cliente" AS "Status do Cliente",
 
 	CASE
-        WHEN (NOW()::DATE - uf."Ultima Fatura") <=  30 THEN 'R1 - Últimos 30 Dias'
-        WHEN (NOW()::DATE - uf."Ultima Fatura") <=  60 THEN 'R2 - 31 A 60 Dias'
+        WHEN (NOW()::DATE - uf."Ultima Fatura") <=  30 THEN 'R5 - Últimos 30 Dias'
+        WHEN (NOW()::DATE - uf."Ultima Fatura") <=  60 THEN 'R4 - 31 A 60 Dias'
         WHEN (NOW()::DATE - uf."Ultima Fatura") <= 120 THEN 'R3 - 61 A 120 Dias'
-        WHEN (NOW()::DATE - uf."Ultima Fatura") <= 180 THEN 'R4 - 121 A 180 Dias'
-        WHEN (NOW()::DATE - uf."Ultima Fatura") <= 999 THEN 'R5 - 181 A 360 Dias'
-    END AS "Faixa de Recencia",
+        WHEN (NOW()::DATE - uf."Ultima Fatura") <= 180 THEN 'R2 - 121 A 180 Dias'
+        WHEN (NOW()::DATE - uf."Ultima Fatura") <= 999 THEN 'R1 - 181 A 360 Dias'
+    END AS "Faixa de Recência",
 
     CASE 
-        WHEN uf."Qtde NF" >= 12 THEN 'F1 - 12 vezes ou mais'
-        WHEN uf."Qtde NF" >= 10 THEN 'F2 - 10 a 11 vezes'
+        WHEN uf."Qtde NF" >= 12 THEN 'F5 - 12 vezes ou mais'
+        WHEN uf."Qtde NF" >= 10 THEN 'F4 - 10 a 11 vezes'
         WHEN uf."Qtde NF" >=  6 THEN 'F3 - 6 a 9 vezes'
-        WHEN uf."Qtde NF" >=  2 THEN 'F4 - 2 a 5 vezes'
-        WHEN uf."Qtde NF" >=  1 THEN 'F5 - 1 vez'
-    END AS "Faixa de Frequencia",
+        WHEN uf."Qtde NF" >=  2 THEN 'F2 - 2 a 5 vezes'
+        WHEN uf."Qtde NF" >=  1 THEN 'F1 - 1 vez'
+    END AS "Faixa de Frequência",
 
     CASE 
         WHEN uf."Valor" >= 1000000 THEN 'M1 - 1 Milhão ou mais'
@@ -138,4 +136,4 @@ GROUP BY
     , sc."status_cliente"
 	, uf."Qtde NF"
 	, uf."Valor"
-) X
+) freq
