@@ -1,7 +1,0 @@
-WITH
-MEMBER [Measures].[Visita] AS
-    [Measures].[indicador], FORMAT_STRING = Iif((([Measures].[Visita]) = (3.0)), "||image=/resources/images/kpi/green-ball\.gif", Iif((([Measures].[Visita]) = (2.0)), "||image=/resources/images/kpi/ball-yellow\.gif", "||image=/resources/images/kpi/ball-red\.gif"))
-SELECT
-NON EMPTY {[Measures].[horarioinicio], [Measures].[horariofim], [Measures].[TempodeTrabalho], [Measures].[Visita]} ON COLUMNS,
-NON EMPTY NonEmptyCrossJoin([periodo.(Dia)].[Todos].Children, NonEmptyCrossJoin([Promotor].[Todos].Children, NonEmptyCrossJoin([PDV].[Todos].Children, NonEmptyCrossJoin([dataentradadia].[Todos].Children, NonEmptyCrossJoin([statusentrada].[Todos].Children, NonEmptyCrossJoin([datasaidadia].[Todos].Children, [statussaida].[Todos].Children)))))) ON ROWS
-FROM [Visitas]
