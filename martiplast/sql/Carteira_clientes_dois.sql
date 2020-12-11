@@ -1,14 +1,11 @@
 WITH ultimas_faturas AS (
 SELECT
 	CAST("Qtde Clientes" AS TEXT) AS "Cod_Cliente",
-	MAX("Periodo") AS "Ultima Fatura",
     MIN("Periodo") AS "Primeira Fatura",
 	SUM( CAST("Vlr Gerencial Fat" AS DOUBLE PRECISION) ) AS "Valor",
 	COUNT(DISTINCT "NF Serie") AS "Qtde NF"
 FROM "ou"."fat_ou_FaturamentoDiarizacao"
-WHERE 
-	/*CAST("Periodo" AS DATE) >= DATE_TRUNC('MONTH', NOW() - '12 MONTHS'::INTERVAL)
-	AND */"Tipo Faturamento" IN ('VENDA', 'DEVOLUCAO')
+WHERE "Tipo Faturamento" IN ('VENDA', 'DEVOLUCAO')
 GROUP BY 1
 
 ), situacao_cliente AS (
@@ -66,8 +63,11 @@ SELECT *
 FROM 
 (SELECT 
 	DATE_TRUNC('MONTH', CAST(f."Periodo" AS DATE)) AS "Periodo",
-    CAST(uf."Ultima Fatura" AS DATE) AS "Período de Última Fatura",
+    TO_CHAR(CAST(f."Periodo Ultima Compra" AS DATE), 'DD/MM/YYYY') AS "Período de Última Fatura",
     CAST(uf."Primeira Fatura" AS DATE) AS "Período de Primeira Fatura",
+
+	TO_CHAR(CAST(f."Periodo Cad Cliente" AS DATE), 'DD/MM/YYYY') AS "Cadastro do Cliente",
+    (NOW()::DATE - CAST(f."Periodo Ultima Compra" AS DATE)) AS "Dias Sem Faturamento",
 
 	CAST(f."Qtde Clientes" AS TEXT) AS "Qtde Clientes",
 	CAST(f."Cliente" AS TEXT) AS "Cliente",
@@ -84,11 +84,11 @@ FROM
     sc."status_cliente" AS "Status do Cliente",
 
 	CASE
-        WHEN (NOW()::DATE - uf."Ultima Fatura") <=  30 THEN 'R5 - Últimos 30 Dias'
-        WHEN (NOW()::DATE - uf."Ultima Fatura") <=  60 THEN 'R4 - 31 A 60 Dias'
-        WHEN (NOW()::DATE - uf."Ultima Fatura") <= 120 THEN 'R3 - 61 A 120 Dias'
-        WHEN (NOW()::DATE - uf."Ultima Fatura") <= 180 THEN 'R2 - 121 A 180 Dias'
-        WHEN (NOW()::DATE - uf."Ultima Fatura") <= 999 THEN 'R1 - 181 A 360 Dias'
+        WHEN (NOW()::DATE - CAST(f."Periodo Ultima Compra" AS DATE)) <=  30 THEN 'R5 - Últimos 30 Dias'
+        WHEN (NOW()::DATE - CAST(f."Periodo Ultima Compra" AS DATE)) <=  60 THEN 'R4 - 31 A 60 Dias'
+        WHEN (NOW()::DATE - CAST(f."Periodo Ultima Compra" AS DATE)) <= 120 THEN 'R3 - 61 A 120 Dias'
+        WHEN (NOW()::DATE - CAST(f."Periodo Ultima Compra" AS DATE)) <= 180 THEN 'R2 - 121 A 180 Dias'
+        WHEN (NOW()::DATE - CAST(f."Periodo Ultima Compra" AS DATE)) <= 999 THEN 'R1 - 181 A 360 Dias'
     END AS "Faixa de Recência",
 
     CASE 
@@ -120,8 +120,9 @@ WHERE
 	AND */f."Tipo Faturamento" IN ('VENDA', 'DEVOLUCAO')
 GROUP BY
 	DATE_TRUNC('MONTH', CAST(f."Periodo" AS DATE))
-	, CAST(uf."Ultima Fatura" AS DATE)
+	, CAST(f."Periodo Ultima Compra" AS DATE)
     , CAST(uf."Primeira Fatura" AS DATE)
+	, CAST(f."Periodo Cad Cliente" AS DATE)
 	, CAST(f."Qtde Clientes" AS TEXT)
 	, CAST(f."Cliente" AS TEXT)
 	, CAST(f."Representante Carteira" AS TEXT)

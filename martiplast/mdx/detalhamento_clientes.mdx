@@ -1,0 +1,5 @@
+SELECT
+NON EMPTY {[Measures].[Venda - Devolucao], [Measures].[qtdclientes]} ON COLUMNS,
+NON EMPTY Order([Cliente].[Todos].Children, [Measures].[Venda - Devolucao], DESC) ON ROWS
+FROM [Clientes]
+WHERE {([FaixadeRFV].[CLIENTES CAMPEÕES])}

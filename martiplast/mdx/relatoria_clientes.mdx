@@ -1,0 +1,38 @@
+WITH
+MEMBER [Periodo.(Mes)].[Dias Sem Faturamento] AS
+    [Measures].[DiasSemFaturamento]
+MEMBER [Periodo.(Mes)].[Total] AS
+    [Periodo.(Mes)].[Todos]
+MEMBER [Measures].[Venda e Devolucao] AS
+    [Measures].[Venda - Devolucao], 
+    FORMAT_STRING = 
+                    iif(
+                        ([Periodo.(Mes)].CurrentMember.Name = "Dias Sem Faturamento"), 
+                            iif([FaixadeRFV].CurrentMember.Name = "CLIENTES CAMPEÕES", "|0 dias|customCss=font-weight:bold\;background-color:\#52AEBB\;", 
+                            
+                            iif([FaixadeRFV].CurrentMember.Name = "CLIENTES POTENCIAL DE LEALDADE", "|0 dias|customCss=background-color:\#2DB962\;font-weight:bold\;", 
+                                
+                            iif([FaixadeRFV].CurrentMember.Name = "CLIENTES NOVOS", "|0 dias|customCss=background-color:\#88B92D\;font-weight:bold\;", 
+                            
+                            iif([FaixadeRFV].CurrentMember.Name = "CLIENTES PROMISSORES", "|0 dias|customCss=background-color:\#4A892B\;font-weight:bold\;", 
+                            
+                            iif([FaixadeRFV].CurrentMember.Name = "CLIENTES LEAIS", "|0 dias|customCss=background-color:\#A1DCE8\;font-weight:bold\;", 
+                            
+                            iif([FaixadeRFV].CurrentMember.Name = "CLIENTES PRECISAM ATENÇÃO", "|0 dias|customCss=background-color:\#DFEEF1\;font-weight:bold\;", 
+                            
+                            iif([FaixadeRFV].CurrentMember.Name = "CLIENTES EM PRÉ-HIBERNAÇÃO", "|0 dias|customCss=background-color:\#8EB24F\;font-weight:bold\;",
+                            
+                            iif([FaixadeRFV].CurrentMember.Name = "CLIENTES HIBERNANDO", "|0 dias|customCss=background-color:\#E9DB8C\;font-weight:bold\;",
+
+                            iif([FaixadeRFV].CurrentMember.Name = "CLIENTES EM RISCO", "|0 dias|customCss=background-color:\#EEA12B\;font-weight:bold\;",
+
+                            iif([FaixadeRFV].CurrentMember.Name = "CLIENTES NÃO PODEMOS PERDER", "|0 dias|customCss=background-color:\#EE2B2B\;font-weight:bold\;",
+                            
+                            "|0 dias|customCss=background-color:\#EE2B2B\;font-weight:bold\;"
+
+                            )))))))))), "|R$ #,##0.00|")
+SELECT
+NON EMPTY NonEmptyCrossJoin({[Measures].[Venda e Devolucao]}, UNION([Periodo.(Mes)].[Todos].Children, {[Periodo.(Mes)].[Total], [Periodo.(Mes)].[Dias Sem Faturamento]})) ON COLUMNS,
+NON EMPTY Order(NonEmptyCrossJoin([Cliente].[Todos].Children, NonEmptyCrossJoin([CadastrodoCliente].[Todos].Children, NonEmptyCrossJoin([PeriododeUltimaFatura].[Todos].Children, [FaixadeRFV].[Todos].Children))), ([Measures].[Venda - Devolucao], [Periodo.(Mes)].[Dias Sem Faturamento]), BDESC) ON ROWS
+FROM [Clientes]
+WHERE NonEmptyCrossJoin(([BIMFPeriodo.(Completo)].[Todos].[2019].[S2].[Q4].[M12] : [BIMFPeriodo.(Completo)].[Todos].[2020].[S2].[Q4].[M12]), {([BIMFRepresentanteCarteira].[AG SIMOES & CHIUDO (037531)])})
