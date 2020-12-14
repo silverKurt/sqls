@@ -1,0 +1,30 @@
+WITH
+
+--Ínício Jornada
+MEMBER [Measures].[inicio_real_perc] AS
+    (([Measures].[tskid], [statusinicio].[OK]) / ([statusinicio].[Todos], [Measures].[tskid])), FORMAT_STRING = "Percent"
+MEMBER [Measures].[inicio_falta_perc] AS
+    (([Measures].[tskid], [statusinicio].[NÃO OK]) / ([statusinicio].[Todos], [Measures].[tskid])), FORMAT_STRING = "Percent"
+
+--Fim Jornada
+MEMBER [Measures].[fim_real_perc] AS
+    (([Measures].[tskid], [statusfim].[OK]) / ([statusfim].[Todos], [Measures].[tskid])), FORMAT_STRING = "Percent"
+MEMBER [Measures].[fim_falta_perc] AS
+    (([Measures].[tskid], [statusfim].[NÃO OK]) / ([statusfim].[Todos], [Measures].[tskid])), FORMAT_STRING = "Percent"
+
+--Saída Intervalo
+MEMBER [Measures].[saida_real_perc] AS
+    (([Measures].[tskid], [statussaida].[OK]) / ([statussaida].[Todos], [Measures].[tskid])), FORMAT_STRING = "Percent"
+MEMBER [Measures].[saida_falta_perc] AS
+    (([Measures].[tskid], [statussaida].[NÃO OK]) / ([statussaida].[Todos], [Measures].[tskid])), FORMAT_STRING = "Percent"
+
+--Retorno Intervalo
+MEMBER [Measures].[retor_real_perc] AS
+    (([Measures].[tskid], [statusretorno].[OK]) / ([statusretorno].[Todos], [Measures].[tskid])), FORMAT_STRING = "Percent"
+MEMBER [Measures].[retor_falta_perc] AS
+    (([Measures].[tskid], [statusretorno].[NÃO OK]) / ([statusretorno].[Todos], [Measures].[tskid])), FORMAT_STRING = "Percent"
+
+SELECT
+NON EMPTY {[Measures].[inicio_real_perc], [Measures].[inicio_falta_perc]} ON COLUMNS,
+NON EMPTY [statusfim].[Todos] ON ROWS
+FROM [AcompanhamentodeJornada]

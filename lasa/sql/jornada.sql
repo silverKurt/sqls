@@ -6,6 +6,7 @@ SELECT DISTINCT
     , age.e_888                                                                               AS "Responsavel"
     , age.e_889                                                                               AS "Regional"
     , age.age_lastgeoposition                                                                 AS "Geo Promotor"
+    , tea.tea_description                                                                     AS "Equipe"
 
      /* TAREFAS */
     , tsk.tsk_id
@@ -18,10 +19,10 @@ SELECT DISTINCT
     , TO_TIMESTAMP(ri.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')                                 AS "Retorno do Intervalo"
     , TO_TIMESTAMP(fe.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')                                 AS "Fim do Expediente"
 
-    , extract(epoch FROM tsk.tsk_realinitialdatehour::TIME)/3600                              AS horario_ini
-    , extract(epoch FROM tsk.tsk_lastexecutiondatehour::TIME)/3600                            AS horario_fim
-    , extract(epoch FROM tsk.tsk_realinitialdatehour::TIME)/3600                              AS horario_inicial
-    , extract(epoch FROM tsk.tsk_lastexecutiondatehour::TIME)/3600                            AS horario_final
+    , extract(epoch FROM TO_TIMESTAMP(ie.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')::TIME)/3600  AS inicio_expediente
+    , extract(epoch FROM TO_TIMESTAMP(si.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')::TIME)/3600  AS saida_intervalo
+    , extract(epoch FROM TO_TIMESTAMP(ri.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')::TIME)/3600  AS retorno_intervalo
+    , extract(epoch FROM TO_TIMESTAMP(fe.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')::TIME)/3600  AS fim_expediente
 
     , extract(epoch FROM (
         (TO_TIMESTAMP(si.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS') - TO_TIMESTAMP(ie.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS'))
@@ -57,6 +58,8 @@ SELECT DISTINCT
 FROM  u13408.dbout_task                                tsk
 LEFT JOIN u13408.dbout_agent                           age             ON (tsk.age_id = age.age_id)
 LEFT JOIN u13408.dbout_local                           loc             ON (tsk.loc_id = loc.loc_id)
+LEFT JOIN u13408.vw_responsible_team_recursive         age_tea         ON (age.age_id = age_tea.agent)
+LEFT JOIN u13408.dbout_team                            tea             ON (age_tea.team = tea.tea_id)
 
 LEFT JOIN u13408.dbout_history_inicioexpediente        ie              ON (tsk.tsk_id = ie.tsk_id)
 LEFT JOIN u13408.dbout_history_fimexpediente           fe              ON (tsk.tsk_id = fe.tsk_id)
