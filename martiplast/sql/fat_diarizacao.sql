@@ -11,14 +11,14 @@ SELECT    "Periodo"
         , (CASE WHEN  "Cd Cliente Agrupador" = '000632' THEN 'SIM'
              ELSE 'NAO' end) as 'Somente Leroy'
         , "Agrupamento Cliente"
-        , (CASE  WHEN "UF" = 'EX' THEN 'EXPORTACAO'
+        , (CASE WHEN "UF" = 'EX' THEN 'EXPORTACAO'
                 WHEN "Cod_Representante_Carteira" = '000129' AND "Cd Cliente Agrupador" IN ('001593', '001638', '002002', '026207', '029024', '029368') THEN '* VENDA DIRETA'
                 WHEN "Cod_Representante_Carteira" = '000129' THEN 'SUL'
                 WHEN "Cod_Representante_Carteira" = '038240' AND "UF" IN ('MA') THEN 'NORDESTE'
                 WHEN "Cod_Representante_Carteira" = '038240' AND "UF" IN ('TO') THEN 'NORTE'
                 WHEN (("Regiao" = null) OR ("Regiao"  ='.') or ("Regiao" = '') or ("Cod_Representante_Carteira" = '' ) or ("Representante" = '999998' ))  THEN '* VENDA DIRETA'
                 ELSE  "Regiao"
-        END) AS  "Regiao"
+        END) AS "Regiao"
         , "UF"
         , "Cod_Representante"
         , "Cod_Representante_Carteira"
@@ -42,36 +42,36 @@ SELECT    "Periodo"
         , "Cod_Cliente" AS "Qtde Clientes"
         
         , (CASE
-              WHEN "Tipo devoluções" = 1 then 'Avarias na embalagem' --INATIVAR
-              WHEN "Tipo devoluções" = 2 then 'Quebra em loja'
-              WHEN "Tipo devoluções" = 3 then 'Falta caixa lacrada'
-              WHEN "Tipo devoluções" = 4 then 'Divergência cor'
-              WHEN "Tipo devoluções" = 5 then 'Divergência de Produto - ALMOX'
-              WHEN "Tipo devoluções" = 6 then 'Divergência de Pedido - COML'
-              WHEN "Tipo devoluções" = 7 then 'Divergência cadastro do cliente'
-              WHEN "Tipo devoluções" = 8 then 'Divergência EAN / DUN'--INATIVAR
-              WHEN "Tipo devoluções" = 9 then 'Acordo Comercial'
-              WHEN "Tipo devoluções" = 10 then 'Falta de volumes'
-              WHEN "Tipo devoluções" = 11 then 'Erro digitação representante'--INATIVAR
-              WHEN "Tipo devoluções" = 12 then 'Nota fiscal emitida sem autorização'--INATIVAR
-              WHEN "Tipo devoluções" = 13 then 'Pedido cancelado pelo cliente'
-              WHEN "Tipo devoluções" = 14 then 'Avaria Produto'
-              WHEN "Tipo devoluções" = 15 then 'Pedido em duplicidade'
-              WHEN "Tipo devoluções" = 16 then 'Perda de agendamento'
-              WHEN "Tipo devoluções" = 17 then 'Defeito de fabricação'
-              WHEN "Tipo devoluções" = 18 then 'Prazo limite de entrega excedido'
-              WHEN "Tipo devoluções" = 19 then 'Divergência de Produto - VENDAS'
-              WHEN "Tipo devoluções" = 35 then 'Avaria transporte'
-              WHEN "Tipo devoluções" = 36 then 'Divergência de pedido - VENDAS'
-              WHEN "Tipo devoluções" = 37 then 'Acordo Comercial - LEROY'
-              WHEN "Tipo devoluções" = 104 then 'Divergência de pedido - TNF (VENDAS)'
-              WHEN "Tipo devoluções" = 105 then 'Divergência de pedido - TNF (ALMOX)'
-              WHEN "Tipo devoluções" = 106 then 'Divergência de pedido - TNF (ALMOX)'
-              WHEN "Tipo devoluções" = 107 then 'Divergência de pedido - TNF (COML)'
-              WHEN "Tipo devoluções" = 109 then 'Acordo Comercial - TNF'
-              WHEN "Tipo devoluções" = 110 then 'Falta de volumes - TNF'
-              WHEN "Tipo devoluções" = 118 then 'Prazo limite de entrega excedido - TNF'
-        else 'Outros' end) AS "Tipo devoluções"
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '1' then 'Avarias na embalagem' --INATIVAR
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '2' then 'Quebra em loja'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '3' then 'Falta caixa lacrada'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '4' then 'Divergência cor'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '5' then 'Divergência de Produto - ALMOX'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '6' then 'Divergência de Pedido - COML'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '7' then 'Divergência cadastro do cliente'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '8' then 'Divergência EAN / DUN'--INATIVAR
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '9' then 'Acordo Comercial'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '10' then 'Falta de volumes'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '11' then 'Erro digitação representante'--INATIVAR
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '12' then 'Nota fiscal emitida sem autorização'--INATIVAR
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '13' then 'Pedido cancelado pelo cliente'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '14' then 'Avaria Produto'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '15' then 'Pedido em duplicidade'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '16' then 'Perda de agendamento'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '17' then 'Defeito de fabricação'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '18' then 'Prazo limite de entrega excedido'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '19' then 'Divergência de Produto - VENDAS'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '35' then 'Avaria transporte'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '36' then 'Divergência de pedido - VENDAS'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '37' then 'Acordo Comercial - LEROY'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '104' then 'Divergência de pedido - TNF (VENDAS)'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '105' then 'Divergência de pedido - TNF (ALMOX)'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '106' then 'Divergência de pedido - TNF (ALMOX)'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '107' then 'Divergência de pedido - TNF (COML)'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '109' then 'Acordo Comercial - TNF'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '110' then 'Falta de volumes - TNF'
+              WHEN RTRIM(LTRIM("Tipo devoluções")) = '118' then 'Prazo limite de entrega excedido - TNF'
+          else 'Outros' end) AS "Tipo devoluções"
             
             , "NF_Serie"                       AS "NF Serie"
             , SUM(Base_Difal) AS "Base_Difal"
@@ -240,21 +240,6 @@ FROM (
                                       + i.Vl_frete
                                       - i.Vl_desconto
                                       - i.Vl_suframa) AS "Vlr Nota Fat" --AS vlr_fat_geral
-                         /*,(CASE 
-                                WHEN i.Cd_tp_operacao = '6113A'  
-                                        THEN (i.Pr_total_item/1.1) - i.Vl_desconto
-                                WHEN i.Cd_tp_operacao IN ('6109A', '6109B') 
-                                        THEN (i.Pr_total_item + i.Vl_frete) - (i.Pr_total_item + i.Vl_frete)*0.0365 - i.Vl_suframa
-                                WHEN i.Cd_tp_operacao IN ('6109C','6109F') 
-                                        THEN (i.Pr_total_item + i.Vl_frete) - (i.Pr_total_item + i.Vl_frete)*0.0365
-                                WHEN i.Cd_tp_operacao IN ('6110A', '6110B', '6110C', '6110F', '6110G', '6102O') 
-                                        THEN (i.Pr_total_item + i.Vl_frete) - (i.Pr_total_item + i.Vl_frete)*0.0365 - i.Vl_desconto
-                                WHEN i.Cd_tp_operacao IN ('6109D', '6109E')
-                                        THEN (i.Pr_total_item + i.Vl_frete) - i.Vl_suframa
-                                WHEN i.Cd_tp_operacao = '6113B'
-                                        THEN (i.Pr_total_item + i.Vl_frete + i.Vl_seguro) - i.Vl_desconto 
-                                ELSE         (i.Pr_total_item + i.Vl_frete + i.Vl_seguro + i.outras_desp_aces) - i.Vl_desconto 
-                          END) AS "Vlr Gerencial Fat" --AS vlr_gerencial */
                     , (CASE 
                             WHEN i.Cd_tp_operacao IN (SELECT DISTINCT t.cd_tipo_operaca FROM getopera t (nolock) INNER JOIN geelemen e (nolock) ON (e.elemento = t.cd_tipo_operaca) WHERE e.cd_tg in (51)) 
                                     THEN (i.Pr_total_item/1.1) - i.Vl_desconto
