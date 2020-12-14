@@ -29,6 +29,31 @@ SELECT DISTINCT
         (TO_TIMESTAMP(fe.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS') - TO_TIMESTAMP(ri.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS'))
     )::TIME)/3600 AS tempo_trabalhado
 
+    , CASE WHEN TO_TIMESTAMP(ie.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')::DATE IS NULL THEN 'NÃO OK'
+           ELSE 'OK'  
+    END as status_inicio
+
+    , CASE WHEN TO_TIMESTAMP(fe.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')::DATE IS NULL THEN 'NÃO OK'
+           ELSE 'OK' 
+    END as status_fim
+
+    , CASE WHEN TO_TIMESTAMP(si.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')::DATE IS NULL THEN 'NÃO OK'
+           ELSE 'OK'  
+    END as status_saida
+
+    , CASE WHEN TO_TIMESTAMP(ri.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')::DATE IS NULL THEN 'NÃO OK'
+           ELSE 'OK' 
+    END as status_retorno
+
+    , CASE WHEN 
+            (TO_TIMESTAMP(ie.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')::DATE IS NOT NULL AND 
+             TO_TIMESTAMP(fe.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')::DATE IS NOT NULL AND
+             TO_TIMESTAMP(si.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')::DATE IS NOT NULL AND 
+             TO_TIMESTAMP(ri.e_data_e_hora, 'dd/MM/yyyy HH24:MI:SS')::DATE IS NOT NULL) 
+            THEN 'OK'
+            ELSE 'NÃO OK'
+    END AS status_expediente
+
 FROM  u13408.dbout_task                                tsk
 LEFT JOIN u13408.dbout_agent                           age             ON (tsk.age_id = age.age_id)
 LEFT JOIN u13408.dbout_local                           loc             ON (tsk.loc_id = loc.loc_id)
@@ -39,5 +64,5 @@ LEFT JOIN u13408.dbout_history_saidaintervalo          si              ON (tsk.t
 LEFT JOIN u13408.dbout_history_retornointervalo        ri              ON (tsk.tsk_id = ri.tsk_id)
 
 WHERE tsk.tsk_scheduleinitialdatehour >= date_trunc('month', now()) - '1 month'::interval
-AND tsk.tsk_situation <> 'Cancelada'
+--AND tsk.tsk_situation <> 'Cancelada'
 AND loc.loc_description = 'Controle de Jornada'
