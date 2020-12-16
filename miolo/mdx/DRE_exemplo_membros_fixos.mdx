@@ -1,0 +1,214 @@
+WITH
+MEMBER [Contas].[01. RECEITA LÍQUIDA] AS
+    [Contas].[(=) RECEITA LÍQUIDA]
+
+MEMBER [Contas].[02. (-) CUSTO] AS
+    [Contas].[( - ) CUSTO DAS MERCADORIAS VENDIDAS E SERVIÇOS PRESTADOS]
+
+MEMBER [Contas].[03. LUCRO BRUTO] AS
+    [Contas].[(=) LUCRO BRUTO]
+
+MEMBER [Contas].[Todos].[4.1 Pessoal] AS
+    ([Contas].[( - ) DESPESAS OPERACIONAIS], [ContaNivel2].[DESPESAS COM PESSOAL])
+
+MEMBER [Contas].[Todos].[4.2 Administrativas / gerais] AS
+    ([Contas].[( - ) DESPESAS OPERACIONAIS], [ContaNivel2].[DESPESAS ADMINISTRATIVAS E GERAIS])
+
+MEMBER [Contas].[Todos].[4.3 Comerciais] AS
+    ([Contas].[( - ) DESPESAS OPERACIONAIS], [ContaNivel2].[DESPESAS COMERCIAIS])
+
+MEMBER [Contas].[Todos].[4.4 Outras] AS
+    ([Contas].[( - ) DESPESAS OPERACIONAIS], [ContaNivel2].[OUTRAS RECEITAS E DESPESAS OPERACIONAIS])
+
+MEMBER [Contas].[Todos].[4.5 Rateio Adm Loja Op] AS
+    [Contas].[RATEIO ADM LOJA OP]
+
+MEMBER [Contas].[Todos].[4.6 Rateio Corp Op Direto] AS
+    [Contas].[RATEIO CORP OP DIRETO]
+
+MEMBER [Contas].[Todos].[4.7 Rateio Corp Op SI] AS
+    [Contas].[RATEIO CORP OP SI]
+
+MEMBER [Contas].[Todos].[4.8 Rateio Corp Op Indireto] AS
+    [Contas].[RATEIO CORP OP INDIRETO]
+
+MEMBER [Contas].[Todos].[4.9 Rateio Corp Adm. LA Op] AS
+    [Contas].[RATEIO CORP ADM LA OP]
+
+MEMBER [Contas].[04. (-) DESPESA OPERACIONAL] AS
+    Aggregate({[Contas].[Todos].[4.1 Pessoal], 
+               [Contas].[Todos].[4.2 Administrativas / gerais], 
+               [Contas].[Todos].[4.3 Comerciais], 
+               [Contas].[Todos].[4.4 Outras], 
+               [Contas].[Todos].[4.5 Rateio Adm Loja Op], 
+               [Contas].[Todos].[4.6 Rateio Corp Op Direto], 
+               [Contas].[Todos].[4.7 Rateio Corp Op SI], 
+               [Contas].[Todos].[4.8 Rateio Corp Op Indireto], 
+               [Contas].[Todos].[4.9 Rateio Corp Adm. LA Op]})
+
+MEMBER [Contas].[05. EBITDA] AS
+    Aggregate({[Contas].[03. LUCRO BRUTO], 
+               [Contas].[04. (-) DESPESA OPERACIONAL]})
+
+MEMBER [Contas].[Todos].[6.1 Deprec./Amort.] AS
+    [Contas].[( - ) DEPRECIAÇÃO E AMORTIZAÇÃO]
+
+MEMBER [Contas].[Todos].[6.2 Rateio Adm Loja Deprec] AS
+    [Contas].[RATEIO ADM LOJA DEPREC]
+
+MEMBER [Contas].[Todos].[6.3 Rateio Corp Direto Deprec] AS
+    [Contas].[RATEIO CORP DIRETO DEPREC]
+
+MEMBER [Contas].[Todos].[6.4 Rateio Corp SI Deprec] AS
+    [Contas].[RATEIO CORP SI DEPREC]
+
+MEMBER [Contas].[Todos].[6.5 Rateio Corp Indireto Deprec] AS
+    [Contas].[RATEIO CORP INDIRETO DEPREC]
+
+MEMBER [Contas].[Todos].[6.6 Rateio Corp Adm. LA Deprec] AS
+    [Contas].[RATEIO CORP ADM LA DEPREC]
+
+MEMBER [Contas].[06. TOTAL DEPREC./AMORT.] AS
+    Aggregate({[Contas].[Todos].[6.1 Deprec./Amort.], 
+               [Contas].[Todos].[6.2 Rateio Adm Loja Deprec], 
+               [Contas].[Todos].[6.3 Rateio Corp Direto Deprec], 
+               [Contas].[Todos].[6.4 Rateio Corp SI Deprec], 
+               [Contas].[Todos].[6.5 Rateio Corp Indireto Deprec], 
+               [Contas].[Todos].[6.6 Rateio Corp Adm. LA Deprec]})
+
+MEMBER [Contas].[07. EBIT] AS
+    Aggregate({[Contas].[05. EBITDA], [Contas].[06. TOTAL DEPREC./AMORT.]})
+
+MEMBER [Contas].[Todos].[8.1 Desp. Financeiras] AS
+    [Contas].[( - ) DESPESAS FINANCEIRAS]
+
+MEMBER [Contas].[Todos].[8.2 Rateio Adm Loja D.Fin] AS
+    [Contas].[RATEIO ADM LOJA D.FIN]
+
+MEMBER [Contas].[Todos].[8.3 Rateio Corp Indireto D.Fin] AS
+    [Contas].[RATEIO CORP INDIRETO D.FIN]
+
+MEMBER [Contas].[Todos].[8.4 Rateio Corp Direto D.Fin] AS
+    [Contas].[RATEIO CORP DIRETO D.FIN] 
+
+MEMBER [Contas].[Todos].[8.5 Rateio Corp SI D.Fin] AS
+    [Contas].[RATEIO CORP SI D.FIN] 
+
+MEMBER [Contas].[Todos].[8.6 Rateio Corp Adm. LA D.Fin] AS
+    [Contas].[RATEIO CORP ADM LA D.FIN]     
+
+MEMBER [Contas].[08. TOTAL DESP. FINANCEIRAS] AS
+    Aggregate({[Contas].[Todos].[8.1 Desp. Financeiras], 
+               [Contas].[Todos].[8.2 Rateio Adm Loja D.Fin], 
+               [Contas].[Todos].[8.3 Rateio Corp Indireto D.Fin].
+               [Contas].[Todos].[8.4 Rateio Corp Direto D.Fin],
+               [Contas].[Todos].[8.5 Rateio Corp SI D.Fin],
+               [Contas].[Todos].[8.6 Rateio Corp Adm. LA D.Fin]})
+
+MEMBER [Contas].[Todos].[9.1 Receitas financeiras] AS
+    [Contas].[(+) RECEITAS FINANCEIRAS]
+
+MEMBER [Contas].[Todos].[9.2 Rateio Adm Loja R.Fin] AS
+    [Contas].[RATEIO ADM LOJA R.FIN]
+
+MEMBER [Contas].[Todos].[9.3 Rateio Corp Indireto R.Fin] AS
+    [Contas].[RATEIO CORP INDIRETO R.FIN]
+
+MEMBER [Contas].[Todos].[9.4 Rateio Corp Direto R.Fin] AS
+    [Contas].[RATEIO CORP DIRETO R.FIN] 
+
+MEMBER [Contas].[Todos].[9.5 Rateio Corp SI R.Fin] AS
+    [Contas].[RATEIO CORP SI R.FIN] 
+
+MEMBER [Contas].[Todos].[9.6 Rateio Corp Adm. LA R.Fin] AS
+    [Contas].[RATEIO CORP ADM LA R.FIN] 
+
+MEMBER [Contas].[09. TOTAL RECEITAS FINANCEIRAS] AS
+    Aggregate({[Contas].[Todos].[9.1 Receitas financeiras], 
+               [Contas].[Todos].[9.2 Rateio Adm Loja R.Fin], 
+               [Contas].[Todos].[9.3 Rateio Corp Indireto R.Fin],
+               [Contas].[Todos].[9.4 Rateio Corp Direto R.Fin],
+               [Contas].[Todos].[9.5 Rateio Corp SI R.Fin],
+               [Contas].[Todos].[9.6 Rateio Corp Adm. LA R.Fin]})
+
+MEMBER [Contas].[10. RESULT. ANTES DOS IMPOSTOS] AS
+    Aggregate({[Contas].[07. EBIT], 
+               [Contas].[08. TOTAL DESP. FINANCEIRAS], 
+               [Contas].[09. TOTAL RECEITAS FINANCEIRAS]})
+
+MEMBER [Contas].[11. IMPOSTOS IR/CS] AS
+    [Contas].[( - ) IMPOSTOS SOBRE O LUCRO]
+
+MEMBER [Contas].[12. LUCRO LÍQUIDO] AS
+    Aggregate({[Contas].[10. RESULT. ANTES DOS IMPOSTOS], 
+               [Contas].[11. IMPOSTOS IR/CS]})
+
+MEMBER [Departamento].[TOTAL A&T] AS 
+Aggregate({[Departamento].[VENDAS A&T], 
+	       [Departamento].[PEÇAS A&T], 
+	       [Departamento].[SERVIÇOS A&T]})
+
+MEMBER [Departamento].[TOTAL C&F] AS 
+Aggregate({[Departamento].[VENDAS C&F], 
+	       [Departamento].[PEÇAS C&F], 
+	       [Departamento].[SERVIÇOS C&F]})
+
+MEMBER [Departamento].[TOTAL PAV] AS 
+Aggregate({[Departamento].[VENDAS PAV], 
+	       [Departamento].[PEÇAS PAV], 
+	       [Departamento].[SERVIÇOS PAV]})
+
+SELECT
+NON EMPTY NonEmptyCrossJoin({[Measures].[ORCADO]}, 
+							{[Departamento].[PEÇAS A&T], 
+							 [Departamento].[SERVIÇOS A&T], 
+							 [Departamento].[VENDAS A&T],
+							 [Departamento].[TOTAL A&T],
+							 [Departamento].[PEÇAS C&F], 
+	       					 [Departamento].[SERVIÇOS C&F],
+	       					 [Departamento].[VENDAS C&F], 
+	       					 [Departamento].[TOTAL C&F],
+	       					 [Departamento].[PEÇAS PAV], 
+	       					 [Departamento].[SERVIÇOS PAV],
+	       					 [Departamento].[VENDAS PAV], 
+	       					 [Departamento].[TOTAL PAV]}) ON COLUMNS,
+NON EMPTY {[Contas].[01. RECEITA LÍQUIDA], 
+           [Contas].[02. (-) CUSTO], 
+           [Contas].[03. LUCRO BRUTO], 
+           [Contas].[04. (-) DESPESA OPERACIONAL], 
+           [Contas].[Todos].[4.1 Pessoal], 
+           [Contas].[Todos].[4.2 Administrativas / gerais], 
+           [Contas].[Todos].[4.3 Comerciais], 
+           [Contas].[Todos].[4.4 Outras], 
+           [Contas].[Todos].[4.5 Rateio Adm Loja Op], 
+           [Contas].[Todos].[4.6 Rateio Corp Op Direto], 
+           [Contas].[Todos].[4.7 Rateio Corp Op SI], 
+           [Contas].[Todos].[4.8 Rateio Corp Op Indireto], 
+           [Contas].[Todos].[4.9 Rateio Corp Adm. LA Op], 
+           [Contas].[05. EBITDA], 
+           [Contas].[06. TOTAL DEPREC./AMORT.], 
+           [Contas].[Todos].[6.1 Deprec./Amort.], 
+           [Contas].[Todos].[6.2 Rateio Adm Loja Deprec], 
+           [Contas].[Todos].[6.3 Rateio Corp Direto Deprec], 
+           [Contas].[Todos].[6.4 Rateio Corp SI Deprec], 
+           [Contas].[Todos].[6.5 Rateio Corp Indireto Deprec], 
+           [Contas].[Todos].[6.6 Rateio Corp Adm. LA Deprec], 
+           [Contas].[07. EBIT], 
+           [Contas].[08. TOTAL DESP. FINANCEIRAS], 
+           [Contas].[Todos].[8.1 Desp. Financeiras], 
+           [Contas].[Todos].[8.2 Rateio Adm Loja D.Fin], 
+           [Contas].[Todos].[8.3 Rateio Corp Indireto D.Fin], 
+           [Contas].[Todos].[8.4 Rateio Corp Direto D.Fin],
+           [Contas].[Todos].[8.5 Rateio Corp SI D.Fin],
+           [Contas].[Todos].[8.6 Rateio Corp Adm. LA D.Fin],
+           [Contas].[09. TOTAL RECEITAS FINANCEIRAS], 
+           [Contas].[Todos].[9.1 Receitas financeiras], 
+           [Contas].[Todos].[9.2 Rateio Adm Loja R.Fin], 
+           [Contas].[Todos].[9.3 Rateio Corp Indireto R.Fin], 
+           [Contas].[Todos].[9.4 Rateio Corp Direto R.Fin],
+           [Contas].[Todos].[9.5 Rateio Corp SI R.Fin],
+           [Contas].[Todos].[9.6 Rateio Corp Adm. LA R.Fin],
+           [Contas].[10. RESULT. ANTES DOS IMPOSTOS], 
+           [Contas].[11. IMPOSTOS IR/CS], 
+           [Contas].[12. LUCRO LÍQUIDO]} ON ROWS
+FROM [DRERateios]		   
