@@ -8,6 +8,12 @@ SELECT DISTINCT
     , age.e_entrada                                                                                         AS "Entrada"
     , age.e_saida                                                                                           AS "Saida"
     , age.e_intervalo                                                                                       AS "Intervalo"
+    , agg.agg_description                                                                                   AS "Tipo de Pessoas"
+    , age.e_posto                                                                                           AS "CR"
+    , age.e_pis                                                                                             AS "PIS"
+    , age.e_ctps                                                                                            AS "CTPS"
+    , 'ACAO PROMOCOES E SERVIÇOS DE EVENTOS LTDA'                                                           AS "Razão Social"
+    , '20.395.437/0001-89'                                                                                  AS "CNPJ"
     , tea.tea_description                                                                                   AS "Equipe"
 
      /* TAREFAS */
@@ -59,6 +65,7 @@ SELECT DISTINCT
 
 FROM  u22715.dbout_task                                tsk
 LEFT JOIN u22715.dbout_agent                           age             ON (tsk.age_id = age.age_id)
+LEFT JOIN u22715.agentgroup                            agg             ON (age.agg_id = agg.agg_id)
 LEFT JOIN u22715.dbout_local                           loc             ON (tsk.loc_id = loc.loc_id)
 LEFT JOIN u22715.vw_responsible_team_recursive         age_tea         ON (age.age_id = age_tea.agent)
 LEFT JOIN u22715.dbout_team                            tea             ON (age_tea.team = tea.tea_id)
@@ -69,4 +76,4 @@ LEFT JOIN u22715.dbout_history_saidaintervalo          si              ON (tsk.t
 LEFT JOIN u22715.dbout_history_retornointervalo        ri              ON (tsk.tsk_id = ri.tsk_id)
 
 WHERE tsk.tsk_scheduleinitialdatehour >= date_trunc('month', now()) - '1 month'::interval
-AND loc.loc_description = 'Controle de Jornada'
+AND loc.loc_description = 'Controle de Jornada';
