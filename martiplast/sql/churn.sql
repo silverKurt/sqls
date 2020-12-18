@@ -73,12 +73,17 @@ WITH REPRESENTANTES AS (
             COALESCE((LAG("Final do Mês", 1) OVER (PARTITION BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio" ORDER BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio", "Mês")), 0::BIGINT)
             ELSE 0
         END AS "Início do Mês"
+        , CASE WHEN CAST(LAG("Mês", 1) OVER (PARTITION BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio" ORDER BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio", "Mês") + '180 DAYS'::INTERVAL AS DATE) = "Mês" THEN
+            COALESCE((LAG("Final do Mês - Vlr", 1) OVER (PARTITION BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio" ORDER BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio", "Mês")), 0::BIGINT)
+            ELSE 0
+        END AS "Início do Mês Vlr"
+        , "Final do Mês - Vlr" AS "Final do Mês Vlr" 
+        , "Clientes Novos - Vlr" AS "Clientes Novos Vlr"
         --, CAST(LAG("Mês", 1) OVER (PARTITION BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio" ORDER BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio", "Mês") + '1 MONTH'::INTERVAL AS DATE) AS "Mês Atual"
     --, COALESCE((LAG("Final do Mês", 1) OVER (PARTITION BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio" ORDER BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio", "Mês")), 0::BIGINT) AS "Início do Mês"
       , "Clientes Novos"
       , "Final do Mês"
       , 'INTERVALO DE 180 DIAS' AS "Analisar"
-      , "Venda - Devolucao"
   FROM (
     SELECT "Mês"
         , "Cod_Representante_Carteira"
@@ -86,7 +91,8 @@ WITH REPRESENTANTES AS (
         , "Unidade_de_Negocio"
         , COUNT(distinct case when "Classification" = 'CLIENTE NOVO' then X."Qtde Clientes" else null end) AS "Clientes Novos"
         , COUNT(DISTINCT X."Qtde Clientes") AS "Final do Mês"
-        , SUM("Vlr Venda" - "Vlr Devolucao") AS "Venda - Devolucao"
+        , SUM("Vlr Venda" - "Vlr Devolucao") AS "Final do Mês - Vlr"
+        , SUM(CASE WHEN "Classification" = 'CLIENTE NOVO' then "Vlr Venda" - "Vlr Devolucao" ELSE NULL END) AS "Clientes Novos - Vlr"
     FROM (
           SELECT DISTINCT
             CR."Periodo"::DATE AS "Mês"
@@ -121,12 +127,17 @@ WITH REPRESENTANTES AS (
             COALESCE((LAG("Final do Mês", 1) OVER (PARTITION BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio" ORDER BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio", "Mês")), 0::BIGINT)
             ELSE 0
         END AS "Início do Mês"
+        , CASE WHEN CAST(LAG("Mês", 1) OVER (PARTITION BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio" ORDER BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio", "Mês") + '1 MONTH'::INTERVAL AS DATE) = "Mês" THEN
+            COALESCE((LAG("Final do Mês - Vlr", 1) OVER (PARTITION BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio" ORDER BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio", "Mês")), 0::BIGINT)
+            ELSE 0
+        END AS "Início do Mês Vlr"
+        , "Final do Mês - Vlr" AS "Final do Mês Vlr" 
+        , "Clientes Novos - Vlr" AS "Clientes Novos Vlr"
         --, CAST(LAG("Mês", 1) OVER (PARTITION BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio" ORDER BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio", "Mês") + '1 MONTH'::INTERVAL AS DATE) AS "Mês Atual"
     --, COALESCE((LAG("Final do Mês", 1) OVER (PARTITION BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio" ORDER BY "Cod_Representante_Carteira", "Regiao", "Unidade_de_Negocio", "Mês")), 0::BIGINT) AS "Início do Mês"
       , "Clientes Novos"
       , "Final do Mês"
       , 'INTERVALO DE MÊS A MÊS' AS "Analisar"
-      , "Venda - Devolucao"
   FROM (
     SELECT "Mês"
         , "Cod_Representante_Carteira"
@@ -134,7 +145,8 @@ WITH REPRESENTANTES AS (
         , "Unidade_de_Negocio"
         , COUNT(distinct case when "Classification" = 'CLIENTE NOVO' then X."Qtde Clientes" else null end) AS "Clientes Novos"
         , COUNT(DISTINCT X."Qtde Clientes") AS "Final do Mês"
-        , SUM(COALESCE("Vlr Venda", 0) - COALESCE("Vlr Devolucao", 0)) AS "Venda - Devolucao"
+        , SUM(COALESCE("Vlr Venda", 0) - COALESCE("Vlr Devolucao", 0)) AS "Final do Mês - Vlr"
+        , SUM(CASE WHEN "Classification" = 'CLIENTE NOVO' THEN COALESCE("Vlr Venda", 0) - COALESCE("Vlr Devolucao", 0) ELSE NULL END) AS "Clientes Novos - Vlr"
     FROM (
       SELECT DISTINCT
         DATE_TRUNC('MONTH', CR."Periodo")::DATE AS "Mês"
