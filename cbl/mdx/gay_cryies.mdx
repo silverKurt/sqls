@@ -1,0 +1,9 @@
+WITH
+MEMBER [PeriodoSemana].[Dia Anterior] AS
+    ([DiaAtualCompleto].Item(0.0).Lag(1.0), [PeriodoFiltro.(Completo)].[Todos])
+MEMBER [Measures].[Ruptura] AS
+    [Measures].[% Ruptura], Format_String = Iif(([Measures].[% Ruptura] > 0.0), "||image=/resources/images/kpi/ball-red\.gif", "||image=/resources/images/kpi/green-ball\.gif")
+SELECT
+NON EMPTY Union(NonEmptyCrossJoin({[PeriodoSemana].[Dia Anterior]}, {[Measures].[VlrUltFaturamento]}), NonEmptyCrossJoin({Except([PeriodoSemana].[Todos].Children, [PeriodoSemana].[NAO INFORMADO])}, {[Measures].[Ruptura]})) ON COLUMNS,
+NON EMPTY Order(Filter(NonEmptyCrossJoin([PDVRegional].[Todos].Children, NonEmptyCrossJoin([PDV].[Todos].Children, NonEmptyCrossJoin([Item].[Todos].Children, [DataUltFaturamento].[Todos].Children))), (([Measures].[% Ruptura], [PeriodoSemana].[Dia Anterior]) > 0.0)), [Measures].[VlrUltFaturamento], DESC) ON ROWS
+FROM [PaineldeRuptura]
