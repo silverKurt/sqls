@@ -207,3 +207,9 @@ WHERE  CAST("Controle" AS TEXT)    in ('31','41','46','50','01','05') and
        CAST("Periodo Programado Filtro" AS DATE) >= DATE_TRUNC('MONTH', NOW()::DATE)
   
 ) MEXFAT
+
+SELECT
+NON EMPTY {[Measures].[ValorProdutos], [Measures].[% Share], [Measures].[Pos. Atual]} ON COLUMNS,
+NON EMPTY TopCount(NonEmptyCrossJoin([ClienteMatriz].[Todos].Children, [RepresentanteCadastro].[Todos].Children), 50.0, [Measures].[ValorProdutos]) ON ROWS
+FROM [Pedidos]
+WHERE NonEmptyCrossJoin(NonEmptyCrossJoin({[Status].[BLOQUEADOS], [Status].[PROCESSADOS EM NF], [Status].[LIBERADOS], [Status].[TOTALMENTE ATENDIDOS]}, {([GeraFaturamento].[SIM], [Tipo].[VENDAS], [Mercado].[INTERNO])}), [BIMFPeriodoAprovacao.CurrentMonth])

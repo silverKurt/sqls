@@ -1,0 +1,41 @@
+WITH
+MEMBER [Measures].[VlrAA] AS
+    Iif(IsEmpty([Measures].[vlr]), NULL, 0.0), FORMAT_STRING = "Currency", $caption = "Vlr AA"
+MEMBER [Measures].[VarVlrAA] AS
+    Iif(([Measures].[VlrAA] > 0.0), (([Measures].[vlr] / [Measures].[VlrAA]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[VarVlrAA] >= 0.0), "|0.00%|style=green", "|0.00%|style=red"), $caption = "% Var. Vlr AA"
+MEMBER [Measures].[Qtd Clientes MA] AS
+    Iif(IsEmpty([Measures].[qtdcliente]), NULL, 0.0)
+MEMBER [Measures].[Preco Medio MA] AS
+    Iif(IsEmpty([Measures].[PrecoMedio]), NULL, 0.0)
+MEMBER [Measures].[Qtde clientes AA] AS
+    Iif(IsEmpty([Measures].[qtdcliente]), NULL, 0.0)
+MEMBER [Measures].[Var. Qtd Clientes MA] AS
+    Iif(([Measures].[qtd clientes MA] > 0.0), (([Measures].[qtdcliente] / [Measures].[qtd clientes MA]) - 1.0), NULL)
+MEMBER [Measures].[Var. Qtd Clientes AA] AS
+    Iif(([Measures].[qtde clientes AA] > 0.0), (([Measures].[qtdcliente] / [Measures].[qtde clientes AA]) - 1.0), NULL)
+MEMBER [Measures].[Preco Medio MMAA] AS
+    Iif(IsEmpty([Measures].[PrecoMedio]), NULL, 0.0)
+MEMBER [Measures].[agreg] AS
+    Aggregate({([periodo.(Mes)].CurrentMember.Lag(12.0) : [periodo.(Mes)].CurrentMember)}, [Measures].[qtdproduto])
+MEMBER [Measures].[EvolucaoPosMix] AS
+    ([Measures].[qtdproduto] / [Measures].[agreg]), format_string = "Percent"
+MEMBER [Measures].[Clientes Ativos] AS
+    Iif(IsEmpty([Measures].[qtdcliente]), NULL, 0.0)
+MEMBER [Measures].[DevoluçõesAA] AS
+    Iif(IsEmpty([Measures].[Devoluções]), NULL, 0.0), $caption = "Devoluções Ano Anterior"
+MEMBER [Measures].[VariaçãoAADevoluções] AS
+    iif(([measures].[devoluçõesAA] <> 0.0), (([Measures].[devoluções] / [measures].[devoluçõesAA]) - 1.0), NULL), FORMAT_STRING = "Percent", $caption = "% Var. Devoluções (AA)"
+MEMBER [Measures].[CoberturaCarteira] AS
+    iif(([measures].[clientes ativos] > 0.0), ([Measures].[qtdcliente] / [Measures].[clientes ativos]), 0.0), FORMAT_STRING = "Percent"
+MEMBER [Measures].[PrecoMedioAA] AS
+    Iif(IsEmpty([Measures].[PrecoMedio]), NULL, 0.0)
+MEMBER [Measures].[VarPrecoMedioAA] AS
+    iif(([Measures].[PrecoMedioAA] > 0.0), (([Measures].[PrecoMedio] / [Measures].[PrecoMedioAA]) - 1.0), NULL), FORMAT_STRING = "Percent", $caption = "% Var. Preco Médio (AA)"
+MEMBER [Measures].[PercMargemAA] AS
+    Iif(IsEmpty([Measures].[PercMargem]), NULL, 0.0), FORMAT_STRING = "Percent", $caption = "% Margem AA"
+MEMBER [Measures].[VarPercMargemAA] AS
+    iif(([Measures].[PercMargemAA] > 0.0), ([Measures].[PercMargem] - [measures].[PercMargemAA]), 0.0), FORMAT_STRING = "Percent", $caption = "Var. Margem ao AA"
+SELECT
+NON EMPTY {[Measures].[EvolucaoPosMix]} ON COLUMNS,
+NON EMPTY Tail(Filter([periodo.(Mes)].[Todos].Children, (([Measures].[EvolucaoPosMix] > 0.0) AND ([Measures].[agreg] > 0.0))), 12.0) ON ROWS
+FROM [FaturamentoProduto]
