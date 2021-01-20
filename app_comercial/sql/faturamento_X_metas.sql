@@ -48,11 +48,13 @@ WITH empresas AS (
 )
 
 SELECT 
-    CAST(m."cod_representante" AS TEXT) AS "cod_representante"
-    , CAST(m."representante" AS TEXT) AS "representante"
+    CAST(p."data" AS DATE) AS "data"
     , COALESCE(CAST(m."empresa" AS TEXT), CAST(emp."empresa" AS TEXT)) AS "empresa"
+    , CAST(m."cod_representante" AS TEXT) AS "cod_representante"
+    , CAST(m."representante" AS TEXT) AS "representante"
     , CASE WHEN COALESCE(CAST(m."meta" AS DOUBLE PRECISION), 0) > 0 THEN 'VENDA' ELSE NULL END AS "tipo_faturamento"
-    , CAST(p."data" AS DATE) AS "data"
+    , CAST(m."cod_supervisor" AS TEXT) AS "codsupervisor" 
+    , CAST(m."supervisor" AS TEXT) AS "supervisor"
 
     , (CAST(m."meta" AS DOUBLE PRECISION) / CAST(dum."dias_uteis_mes" AS DOUBLE PRECISION)) AS "meta" 
     , (CAST(m."qtd_meta" AS DOUBLE PRECISION) / CAST(dum."dias_uteis_mes" AS DOUBLE PRECISION)) AS "qtd_meta"
@@ -83,12 +85,14 @@ LEFT JOIN dias_uteis_corridos_ano dca ON (CAST(DATE_TRUNC('YEAR', p."data") AS D
 UNION ALL
 
 SELECT
-    CAST("cod_representante" AS TEXT) AS "cod_representante"
-    , CAST("representante" AS TEXT) AS "representante"
+    CAST("data" AS DATE) AS "data"
     , CAST("empresa" AS TEXT) AS "empresa"
+    , CAST("cod_representante" AS TEXT) AS "cod_representante"
+    , CAST("representante" AS TEXT) AS "representante"
     , CAST("tipo_faturamento" AS TEXT) AS "tipo_faturamento"
-    , CAST("data" AS DATE) AS "data"
-    
+	, CAST("cod_supervisor" AS TEXT) AS "codsupervisor" 
+    , CAST("supervisor" AS TEXT) AS "supervisor"
+
     , CAST(NULL AS DOUBLE PRECISION) AS "meta"
     , CAST(NULL AS DOUBLE PRECISION) AS "qtd_meta"
     , CAST(NULL AS DOUBLE PRECISION) AS "volume_meta"
