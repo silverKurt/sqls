@@ -23,11 +23,8 @@ SELECT
            WHEN CAST("estado" AS TEXT) IN ('AM', 'PA', 'TO', 'AP','RO', 'AC', 'RR') THEN 'NORTE'
     END AS "regiao"
     
-    /*MEDIDAS FÍSICAS*/
     , SUM(CAST("qtd" AS DOUBLE PRECISION))          AS "qtd"
     , SUM(CAST("volume" AS DOUBLE PRECISION))       AS "volume"
-
-    /*MEDIDAS MONETÁRIAS*/
     , SUM(CAST("faturamento" AS DOUBLE PRECISION))  AS "faturamento"
 
 FROM "appgestaocomercialv3"."fat_appgestaocomercialv3_FaturamentoBase"
