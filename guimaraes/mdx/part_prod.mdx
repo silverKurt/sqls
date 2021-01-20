@@ -1,0 +1,11 @@
+WITH
+MEMBER [Measures].[__Share %1] AS
+    Rank([grupoproduto].CurrentMember, Order([grupoproduto].[Todos].Children, [Measures].[vlr], BDESC)), $visible = "false"
+MEMBER [Measures].[__Share %2] AS
+    Sum(Head(Order([grupoproduto].[Todos].Children, [Measures].[vlr], BDESC), [Measures].[__Share %1]), [Measures].[vlr]), $visible = "false"
+MEMBER [Measures].[Share %] AS
+    iif(IsEmpty([Measures].[vlr]), NULL, ([Measures].[__Share %2] / ([grupoproduto].[Todos], [Measures].[vlr]))), FORMAT_STRING = Iif((([Measures].[Share %]) < (0.3)), "|0.00%|customCss=background-color:\#47846a", Iif((([Measures].[Share %]) < (0.8)), "|0.00%|customCss=background-color:\#f4f1b\0", "|0.00%|customCss=background-color:\#ed5757"))
+SELECT
+NON EMPTY {[Measures].[vlr], [Measures].[qtd], [Measures].[Share %], [Measures].[PrecoMedio]} ON COLUMNS,
+NON EMPTY Order([grupoproduto].[Todos].Children, [Measures].[Share %], ASC) ON ROWS
+FROM [FaturamentoProduto]

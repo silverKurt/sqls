@@ -1,0 +1,49 @@
+WITH
+MEMBER [Measures].[Clientes Ativos] AS
+    iif(([Measures].[qtdclientes] > 0.0), Aggregate({([periodo.(Mes)].CurrentMember.Lag(12.0) : [periodo.(Mes)].CurrentMember)}, [Measures].[qtdclientes]), NULL)
+MEMBER [Measures].[Cobertura] AS
+    ([Measures].[qtdclientes] / Aggregate({([periodo.(Mes)].CurrentMember.Lag(12.0) : [periodo.(Mes)].CurrentMember)}, [Measures].[qtdclientes])), format_string = "Percent"
+MEMBER [Measures].[Qtd Clientes Ativos] AS
+    Iif(IsEmpty([Measures].[qtdclientes]), NULL, 0.0), FORMAT_STRING = "Standard", $caption = "Clientes Ativos"
+MEMBER [Measures].[Qtd Clientes AA] AS
+    Iif(IsEmpty([Measures].[qtdclientes]), NULL, 0.0), $caption = "Clientes (AA)"
+MEMBER [Measures].[Var. Clientes Ano] AS
+    iif(([Measures].[Qtd Clientes AA] > 0.0), (([Measures].[qtdclientes] / [Measures].[Qtd Clientes AA]) - 1.0), NULL), FORMAT_STRING = "Percent", $caption = "Cresc. Clientes (AA)"
+MEMBER [Measures].[% Clientes Novos AA] AS
+    Iif(IsEmpty([Measures].[% Clientes Novos]), NULL, 0.0), FORMAT_STRING = "Percent"
+MEMBER [Measures].[FatAcm] AS
+    Iif(IsEmpty([Measures].[vlrtotalfatura]), NULL, 0.0), $caption = "Fat. Acumulado (Mes)"
+MEMBER [Measures].[FatAcmAA] AS
+    Iif(IsEmpty([Measures].[vlrtotalfatura]), NULL, 0.0), $caption = "Fat Acumulado (AA)"
+MEMBER [Measures].[FatAcmMA] AS
+    Iif(IsEmpty([Measures].[vlrtotalfatura]), NULL, 0.0), $caption = "Fat Acumulado (MA)"
+MEMBER [Measures].[FatAcmAnoFiltro] AS
+    Iif(IsEmpty([Measures].[vlrtotalfatura]), NULL, 0.0), $caption = "Fat Acumulado (Ano)"
+MEMBER [Measures].[Qtd Vendida AA] AS
+    Iif(IsEmpty([Measures].[qtd]), NULL, 0.0), $caption = "Quantidade (AA)"
+MEMBER [Measures].[Cresc Vol Vendas AA] AS
+    iif(([measures].[Qtd Vendida AA] > 0.0), (([Measures].[qtd] / [Measures].[Qtd Vendida AA]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[Qtd Vendida AA] > 0.0), Iif(([Measures].[Cresc Vol Vendas AA] <= 0.0), "|0.00%|style=red", Iif(([Measures].[Cresc Vol Vendas AA] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Cresc. Qtd (AA)"
+MEMBER [Measures].[Qtd Vendida MA] AS
+    Iif(IsEmpty([Measures].[qtd]), NULL, 0.0), $caption = "Qtd (MA)"
+MEMBER [Measures].[Cresc Vol Vendas MA] AS
+    iif(([Measures].[Qtd Vendida MA] > 0.0), (([Measures].[qtd] / [Measures].[Qtd Vendida MA]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[Qtd Vendida MA] > 0.0), Iif(([Measures].[Cresc Vol Vendas MA] <= 0.0), "|0.00%|style=red", Iif(([Measures].[Cresc Vol Vendas MA] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL)
+MEMBER [Measures].[QtdAcmAno] AS
+    Iif(IsEmpty([Measures].[qtd]), NULL, 0.0), $caption = "Qtd Acumulada (Ano)"
+MEMBER [Measures].[QtdAcmAA] AS
+    Iif(IsEmpty([Measures].[qtd]), NULL, 0.0), $caption = "Qtd Acumulada (AA)"
+MEMBER [Measures].[VarACMAAVlr] AS
+    iif(([Measures].[FatAcmAA] > 0.0), (([measures].[FatAcmAnoFiltro] / [Measures].[FatAcmAA]) - 1.0), NULL), FORMAT_STRING = "Percent", $caption = "Cresc. Acumulado Fat (AA)"
+MEMBER [Measures].[VarACMAAQtd] AS
+    iif(([Measures].[QtdAcmAA] > 0.0), (([Measures].[QtdAcmAno] / [measures].[QtdAcmAA]) - 1.0), NULL), FORMAT_STRING = "Percent", $caption = "Cresc. Acumulado Qtd (AA)"
+MEMBER [Measures].[VlrFatMA] AS
+    Iif(IsEmpty([Measures].[vlrtotalfatura]), NULL, 0.0), $caption = "Fat. Bruto MA"
+MEMBER [Measures].[VlrFatAA] AS
+    Iif(IsEmpty([Measures].[vlrtotalfatura]), NULL, 0.0), $caption = "Fat. Bruto AA"
+MEMBER [Measures].[VariacaoMA] AS
+    iif(([Measures].[VlrFatMA] > 0.0), (([Measures].[vlrtotalfatura] / [Measures].[VlrFatMA]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[VlrFatMA] > 0.0), Iif(([Measures].[VariacaoMA] <= 0.0), "|0.00%|style=red", Iif(([Measures].[VariacaoMA] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Cresc. Mensal Fat. Bruto"
+MEMBER [Measures].[VariacaoAA] AS
+    iif(([Measures].[VlrFatAA] > 0.0), (([Measures].[vlrtotalfatura] / [Measures].[VlrFatAA]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[VlrFatAA] > 0.0), Iif(([Measures].[VariacaoAA] <= 0.0), "|0.00%|style=red", Iif(([Measures].[VariacaoAA] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Cresc. Anual Fat. Bruto"
+SELECT
+NON EMPTY {[Measures].[qtdclientes], [Measures].[Clientes Ativos], [Measures].[Cobertura]} ON COLUMNS,
+NON EMPTY Tail(Filter([periodo.(Mes)].[Todos].Children, [Measures].[Clientes Ativos] > 0), 12) ON ROWS
+FROM [FaturamentoDiarizacao]

@@ -1,0 +1,7 @@
+WITH
+MEMBER [Measures].[Descricao] AS
+    [Measures].[Grupos não comprados], format_string = iif(([Measures].[Descricao] <> 0.0), "Não Comprado", "Comprado")
+SELECT
+{[Measures].[Descricao]} ON COLUMNS,
+Except([grupoproduto].[Todos].Children, {[grupoproduto].[NAO INFORMADO], [grupoproduto].[SUPER RODO]}) ON ROWS
+FROM [FaturamentoProduto]

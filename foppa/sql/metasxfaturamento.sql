@@ -9,9 +9,10 @@ FROM (
 	FROM (
 		SELECT DISTINCT
 			"CodProduto"::TEXT
-		    , DATE_TRUNC('MONTH', "DataVenda") AS "DataVenda"
+		    , "DataVenda"
+      		, v."Hora_da_Venda"--PRECISA TER PARA MAIS VENDAS DENTRO DE 1 DIA
 		    , v."CMVUnitario"
-		    , v."ValorLiquido"
+		    , v."ValorLiquido"/ "QtdeTotalItem" as "ValorLiquido"
 			/*(SELECT iv."CMVUnitario" FROM "foppa"."fat_foppa_Vendas" iv WHERE CAST(iv."CodProduto" AS TEXT) = CAST(v."CodProduto" AS TEXT) ORDER BY "DataVenda" DESC LIMIT 1) AS "CMVUnitarioUC",
 		    (SELECT iv."ValorLiquido" FROM "foppa"."fat_foppa_Vendas" iv WHERE CAST(iv."CodProduto" AS TEXT) = CAST(v."CodProduto" AS TEXT) ORDER BY "DataVenda" DESC LIMIT 1) AS "VlrLiquidoUC"*/
 		FROM "foppa"."fat_foppa_Vendas" v
@@ -154,6 +155,11 @@ LEFT JOIN primeira_ultima_fatura pu ON (CAST(pu."CodProduto" AS TEXT) = CAST(v."
 
 UNION ALL
 
+/*
+
+    As metas são calculadas de modo que o faturamento do 
+
+*/
 --Calculo das Metas por loja
 SELECT
       'V' AS "TipoVenda"

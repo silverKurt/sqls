@@ -15,10 +15,10 @@ MEMBER [Measures].[Var. Qtd Clientes AA] AS
     Iif(([Measures].[qtde clientes AA] > 0.0), (([Measures].[qtdcliente] / [Measures].[qtde clientes AA]) - 1.0), NULL)
 MEMBER [Measures].[Preco Medio MMAA] AS
     Iif(IsEmpty([Measures].[PrecoMedio]), NULL, 0.0)
-MEMBER [Measures].[agreg] AS
+MEMBER [Measures].[last12Months] AS
     Aggregate({([periodo.(Mes)].CurrentMember.Lag(12.0) : [periodo.(Mes)].CurrentMember)}, [Measures].[qtdproduto])
 MEMBER [Measures].[EvolucaoPosMix] AS
-    ([Measures].[qtdproduto] / [Measures].[agreg]), format_string = "Percent"
+    ([Measures].[qtdproduto] / [Measures].[last12Months]), format_string = "Percent"
 MEMBER [Measures].[Clientes Ativos] AS
     Iif(IsEmpty([Measures].[qtdcliente]), NULL, 0.0)
 MEMBER [Measures].[DevoluçõesAA] AS
@@ -37,5 +37,5 @@ MEMBER [Measures].[VarPercMargemAA] AS
     iif(([Measures].[PercMargemAA] > 0.0), ([Measures].[PercMargem] - [measures].[PercMargemAA]), 0.0), FORMAT_STRING = "Percent", $caption = "Var. Margem ao AA"
 SELECT
 NON EMPTY {[Measures].[EvolucaoPosMix]} ON COLUMNS,
-NON EMPTY Tail(Filter([periodo.(Mes)].[Todos].Children, (([Measures].[EvolucaoPosMix] > 0.0) AND ([Measures].[agreg] > 0.0))), 12.0) ON ROWS
+NON EMPTY Tail(Filter([periodo.(Mes)].[Todos].Children, (([Measures].[EvolucaoPosMix] > 0.0) AND ([Measures].[last12Months] > 0.0))), 12.0) ON ROWS
 FROM [FaturamentoProduto]

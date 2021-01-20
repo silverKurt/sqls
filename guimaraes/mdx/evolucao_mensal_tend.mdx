@@ -1,0 +1,15 @@
+WITH
+MEMBER [Measures].[Meta] AS
+    Iif([BIMFgrupovendedores].CurrentMember.Name = "GERAL", [Measures].[vlrmeta], [Measures].[vlrmetavendedor])
+MEMBER [Measures].[vlr_total] AS 
+    iif([BIMFgrupovendedores].CurrentMember.Name = "GERAL", ([BIMFgrupovendedores].[Todos], [Measures].[vlr]), [Measures].[vlr]), FORMAT_STRING = "Currency", $caption = "Vlr Gerencial"
+
+MEMBER [Measures].[ACIMA] AS
+    iif(([Measures].[vlr_total] > [Measures].[Meta]), [Measures].[vlr_total], NULL)
+MEMBER [Measures].[ABAIXO] AS
+    iif(([Measures].[vlr_total] < [Measures].[Meta]), [Measures].[vlr_total], NULL)
+SELECT
+NON EMPTY {[Measures].[ACIMA], [Measures].[ABAIXO], [Measures].[Meta]} ON COLUMNS,
+NON EMPTY [periodo.(Mes)].[Todos].Children ON ROWS
+FROM [MetaxFaturamentoNovo]
+WHERE NonEmptyCrossJoin(([BIMFperiodo.(Completo)].[Todos].[2020].[S1].[Q1].[M1] : [BIMFperiodo.(Completo)].[Todos].[2021].[S1].[Q1].[M1]), {([BIMFgrupovendedores].[GERAL])})

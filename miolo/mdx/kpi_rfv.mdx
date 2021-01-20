@@ -1,0 +1,24 @@
+WITH MEMBER [Measures].[QtdeClientes-Verde] AS
+	([FaixadeFrequencia].[F1 - 12 VEZES OU MAIS], [FaixadeRecencia].[R1 - ÚLTIMOS 30 DIAS], [Measures].[QtdeClientes]) 
+    +
+    ([FaixadeFrequencia].[F1 - 12 VEZES OU MAIS], [FaixadeRecencia].[R2 - 31 A 60 DIAS], [Measures].[QtdeClientes]) 	
+    +
+    ([FaixadeFrequencia].[F2 - 10 A 11 VEZES], [FaixadeRecencia].[R1 - ÚLTIMOS 30 DIAS], [Measures].[QtdeClientes])
+    + 
+    ([FaixadeFrequencia].[F3 - 6 A 9 VEZES], [FaixadeRecencia].[R1 - ÚLTIMOS 30 DIAS], [Measures].[QtdeClientes])
+    + 
+    ([FaixadeFrequencia].[F4 - 2 A 5 VEZES], [FaixadeRecencia].[R1 - ÚLTIMOS 30 DIAS], [Measures].[QtdeClientes])
+SELECT
+{[Measures].[QtdeClientes-Verde]} ON COLUMNS
+FROM [CarteiradeClientes]
+
+/*
+    Share Coberto, clientes identificados já são - FEITO
+    tirar tracinho da carteira ativa - FEITO
+    CLIENTES E CLIENTES ATIVOS, QUEM SÃO? - FEITO
+    INDICADOR DE FREQUÊNCIA - COMERCIAL REGIONAL - DIFERENCÇA DE FILTROS, SE APLICAR OS MESMOS, AÍ DÁ O NÚMERO CERTO
+    REGIONAL NORTE - ULTIMOS 12 MESES - REF ANTERIOR
+    CLIENTES FATURADOS DOS ÚLTIMOS DOIS ANOS
+    LISTAR FAIXA DE CLIENTES 30 A 60 DIAS
+
+*/

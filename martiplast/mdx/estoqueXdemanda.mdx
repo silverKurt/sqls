@@ -1,0 +1,10 @@
+WITH
+MEMBER [Measures].[Estoque CA 400] AS
+    [Measures].[QuantidadeEstoque2]
+MEMBER [Measures].[Estoque Final] AS
+    ([Measures].[QuantidadeEstoque2] - [Measures].[DemandaPedido2])
+SELECT
+NON EMPTY {[Measures].[Estoque CA 400], [Measures].[DemandaPedido2], [Measures].[Estoque Final]} ON COLUMNS,
+NON EMPTY NonEmptyCrossJoin([ReferenciaCor].[Todos].Children, NonEmptyCrossJoin([DescricaoMaterial].[Todos].Children, {[Centralizadora].[Todos]})) ON ROWS
+FROM [EstoquexDemandas]
+WHERE NonEmptyCrossJoin({[GrupoMaterial].[60 - PRODUTOS ACABADOS], [GrupoMaterial].[61 - PRODUTOS ACABADOS GERAL], [GrupoMaterial].[65 - PRODUTOS PARA REVENDA]}, {([UnidadedeNegocio].[OU], [OrigemProduto].[NACIONAL], [CentrodeArmazenagem].[400])})

@@ -1,0 +1,18 @@
+WITH
+MEMBER [Measures].[trend] AS
+    iif(([grupovendedores].CurrentMember.Name = "GERAL"), ([grupovendedores].[Todos], [Measures].[Tendência (Filtro)]), [Measures].[Tendência (Filtro)]), FORMAT_STRING = "Currency", $caption = "Tendência de Fatur."
+MEMBER [Measures].[Ating. Tendencia] AS
+    iif(([Measures].[Meta] > 0.0), ([Measures].[trend] / [Measures].[Meta]), NULL), FORMAT_STRING = Iif(([Measures].[Meta] > 0.0), Iif(([Measures].[Ating. Tendencia] <= 0.9), "|0.00%|style=red", Iif((([Measures].[Ating. Tendencia] > 0.9) AND ([Measures].[Ating. Tendencia] < 1.0)), "|0.00%|style=yellow", "|0.00%|style=green")), NULL)
+MEMBER [Measures].[Meta] AS
+    CoalesceEmpty([Measures].[vlrmeta], [Measures].[vlrmetavendedor])
+MEMBER [Measures].[AtingVendaPerc] AS
+    Iif(((([Measures].[Meta] = 0.0) OR IsEmpty([Measures].[Meta])) OR (([Measures].[vlr_total] = 0.0) OR IsEmpty([Measures].[vlr_total]))), NULL, ([Measures].[vlr_total] / [Measures].[Meta])), FORMAT_STRING = Iif(([Measures].[AtingVendaPerc] < 0.9), "|0.00%|style=red", Iif(([Measures].[AtingVendaPerc] >= 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), $caption = "Atingimento"
+MEMBER [Measures].[vlr_total] AS
+    iif(([grupovendedores].CurrentMember.Name = "GERAL"), ([grupovendedores].[Todos], [Measures].[vlr]), [Measures].[vlr]), FORMAT_STRING = "Currency", $caption = "Vlr Gerencial"
+MEMBER [Measures].[trend] AS
+    iif(([grupovendedores].CurrentMember.Name = "GERAL"), ([grupovendedores].[Todos], [Measures].[Tendência (Filtro)]), [Measures].[Tendência (Filtro)]), FORMAT_STRING = "Currency", $caption = "Tendência de Fatur."
+SELECT
+NON EMPTY {[Measures].[vlr_total], [Measures].[Meta], [Measures].[AtingVendaPerc], [Measures].[trend], [Measures].[Ating. Tendencia]} ON COLUMNS,
+NON EMPTY NonEmptyCrossJoin(Filter([grupovendedores].[Todos].Children, (([Measures].[Meta] > 0.0) OR (NOT IsEmpty([Measures].[Meta])))), {[representante].[Todos]}) ON ROWS
+FROM [MetaxFaturamentoNovo]
+WHERE {([BIMFperiodo.CurrentMonth])}
