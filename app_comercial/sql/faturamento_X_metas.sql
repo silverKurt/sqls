@@ -48,32 +48,29 @@ WITH empresas AS (
 )
 
 SELECT 
-    CAST(p."data" AS DATE) AS "data"
-    , COALESCE(CAST(m."empresa" AS TEXT), CAST(emp."empresa" AS TEXT)) AS "empresa"
-    , CAST(m."cod_representante" AS TEXT) AS "cod_representante"
-    , CAST(m."representante" AS TEXT) AS "representante"
-    , CASE WHEN COALESCE(CAST(m."meta" AS DOUBLE PRECISION), 0) > 0 THEN 'VENDA' ELSE NULL END AS "tipo_faturamento"
-    , CAST(m."cod_supervisor" AS TEXT) AS "codsupervisor" 
-    , CAST(m."supervisor" AS TEXT) AS "supervisor"
+    CAST(p."data" AS DATE)                                                                                          AS "data"
+    , COALESCE(CAST(m."empresa" AS TEXT), CAST(emp."empresa" AS TEXT))                                              AS "empresa"
+    , CAST(m."cod_representante" AS TEXT)                                                                           AS "cod_representante"
+    , CAST(m."representante" AS TEXT)                                                                               AS "representante"
+    , CASE WHEN COALESCE(CAST(m."meta" AS DOUBLE PRECISION), 0) > 0 THEN 'VENDA' ELSE NULL END                      AS "tipo_faturamento"
+    , CAST(m."cod_supervisor" AS TEXT)                                                                              AS "codsupervisor" 
+    , CAST(m."supervisor" AS TEXT)                                                                                  AS "supervisor"
 
-    , (CAST(m."meta" AS DOUBLE PRECISION) / CAST(dum."dias_uteis_mes" AS DOUBLE PRECISION)) AS "meta" 
-    , (CAST(m."qtd_meta" AS DOUBLE PRECISION) / CAST(dum."dias_uteis_mes" AS DOUBLE PRECISION)) AS "qtd_meta"
-    , (CAST(m."volume_meta" AS DOUBLE PRECISION) / CAST(dum."dias_uteis_mes" AS DOUBLE PRECISION)) AS "volume_meta"
+    , (CAST(m."meta" AS DOUBLE PRECISION) / CAST(dum."dias_uteis_mes" AS DOUBLE PRECISION))                         AS "meta" 
+    , (CAST(m."qtd_meta" AS DOUBLE PRECISION) / CAST(dum."dias_uteis_mes" AS DOUBLE PRECISION))                     AS "qtd_meta"
+    , (CAST(m."volume_meta" AS DOUBLE PRECISION) / CAST(dum."dias_uteis_mes" AS DOUBLE PRECISION))                  AS "volume_meta"
 
-    , CAST(NULL AS DOUBLE PRECISION) AS "qtd"
-    , CAST(NULL AS DOUBLE PRECISION) AS "volume"
-    , CAST(NULL AS DOUBLE PRECISION) AS "faturamento"
+    , CAST(NULL AS DOUBLE PRECISION)                                                                                AS "qtd"
+    , CAST(NULL AS DOUBLE PRECISION)                                                                                AS "volume"
+    , CAST(NULL AS DOUBLE PRECISION)                                                                                AS "faturamento"
 
-    , CASE WHEN COALESCE(m."meta", 0) > 0 THEN CAST(dum."dias_uteis_mes" AS DOUBLE PRECISION) ELSE NULL END as "dias_uteis_mes"
-    , CASE WHEN COALESCE(m."meta", 0) > 0 THEN CAST(dcm."dias_uteis_corridos" AS DOUBLE PRECISION) ELSE NULL END as "dias_uteis_corridos_mes"
+    , CASE WHEN COALESCE(m."meta", 0) > 0 THEN CAST(dum."dias_uteis_mes" AS DOUBLE PRECISION) ELSE NULL END         AS "dias_uteis_mes"
+    , CASE WHEN COALESCE(m."meta", 0) > 0 THEN CAST(dcm."dias_uteis_corridos" AS DOUBLE PRECISION) ELSE NULL END    AS "dias_uteis_corridos_mes"
     
     /*, CASE WHEN COALESCE(m."meta", 0) > 0 THEN dua."DIAS_UTEIS_ANO" ELSE NULL END as "dias_uteis_ano"
     , CASE WHEN COALESCE(m."meta", 0) > 0 THEN dca."DIAS_UTEIS_CORRIDOS_ANO" ELSE NULL END as "dias_uteis_corridos_ano"*/
 FROM "appgestaocomercialv3"."fat_appgestaocomercialv3_Metas" m
-LEFT JOIN "appgestaocomercialv3"."fat_appgestaocomercialv3_Calendario" p ON (
-    CAST(DATE_TRUNC('MONTH', m."data") AS DATE) = CAST(DATE_TRUNC('MONTH', p."data") AS DATE)
-AND p."util"::INTEGER = 1)
-
+LEFT JOIN "appgestaocomercialv3"."fat_appgestaocomercialv3_Calendario" p ON (CAST(DATE_TRUNC('MONTH', m."data") AS DATE) = CAST(DATE_TRUNC('MONTH', p."data") AS DATE) AND p."util"::INTEGER = 1)
 LEFT JOIN empresas emp ON ((p."cod_empresa"::TEXT)= (emp."cod_empresa"::TEXT))
 LEFT JOIN dias_uteis_mes dum ON (CAST(DATE_TRUNC('MONTH', p."data") AS DATE) = CAST(dum."mes_referencia" AS DATE))
 LEFT JOIN dias_uteis_corridos_mes dcm ON (CAST(DATE_TRUNC('MONTH', p."data") AS DATE) = CAST(dcm."mes_referencia" AS DATE))
@@ -85,24 +82,24 @@ LEFT JOIN dias_uteis_corridos_ano dca ON (CAST(DATE_TRUNC('YEAR', p."data") AS D
 UNION ALL
 
 SELECT
-    CAST("data" AS DATE) AS "data"
-    , CAST("empresa" AS TEXT) AS "empresa"
-    , CAST("cod_representante" AS TEXT) AS "cod_representante"
-    , CAST("representante" AS TEXT) AS "representante"
-    , CAST("tipo_faturamento" AS TEXT) AS "tipo_faturamento"
-	, CAST("cod_supervisor" AS TEXT) AS "codsupervisor" 
-    , CAST("supervisor" AS TEXT) AS "supervisor"
+    CAST("data" AS DATE)                                                                                            AS "data"
+    , CAST("empresa" AS TEXT)                                                                                       AS "empresa"
+    , CAST("cod_representante" AS TEXT)                                                                             AS "cod_representante"
+    , CAST("representante" AS TEXT)                                                                                 AS "representante"
+    , CAST("tipo_faturamento" AS TEXT)                                                                              AS "tipo_faturamento"
+	, CAST("cod_supervisor" AS TEXT)                                                                                AS "codsupervisor" 
+    , CAST("supervisor" AS TEXT)                                                                                    AS "supervisor"
 
-    , CAST(NULL AS DOUBLE PRECISION) AS "meta"
-    , CAST(NULL AS DOUBLE PRECISION) AS "qtd_meta"
-    , CAST(NULL AS DOUBLE PRECISION) AS "volume_meta"
+    , CAST(NULL AS DOUBLE PRECISION)                                                                                AS "meta"
+    , CAST(NULL AS DOUBLE PRECISION)                                                                                AS "qtd_meta"
+    , CAST(NULL AS DOUBLE PRECISION)                                                                                AS "volume_meta"
 
-    , CAST("qtd" AS DOUBLE PRECISION) AS "qtd"
-    , CAST("volume" AS DOUBLE PRECISION) AS "volume"
-    , CAST("faturamento" AS DOUBLE PRECISION) AS "faturamento"
+    , CAST("qtd" AS DOUBLE PRECISION)                                                                               AS "qtd"
+    , CAST("volume" AS DOUBLE PRECISION)                                                                            AS "volume"
+    , CAST("faturamento" AS DOUBLE PRECISION)                                                                       AS "faturamento"
 
-    , CAST(NULL AS DOUBLE PRECISION) AS "dias_uteis_mes"
-    , CAST(NULL AS DOUBLE PRECISION) AS "dias_uteis_corridos_mes"
+    , CAST(NULL AS DOUBLE PRECISION)                                                                                AS "dias_uteis_mes"
+    , CAST(NULL AS DOUBLE PRECISION)                                                                                AS "dias_uteis_corridos_mes"
 
     /*, CAST(NULL AS DOUBLE PRECISION) AS dias_uteis_ano
     , CAST(NULL AS DOUBLE PRECISION) AS dias_uteis_corridos_ano*/
