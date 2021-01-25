@@ -1,0 +1,18 @@
+SELECT  
+    "data_cadastro"
+    , "cod_cliente"
+    , "cliente"    
+    , "cidade"
+    , "estado"
+    , "pais"
+    , "bairro"
+    , "endereco"
+    , "segmento_cliente"
+    , "email"
+    , "telefone"
+    , "cod_representante"
+    , "regiao"
+    , "cnpj_cliente"
+    , "status_cliente"
+    , "data_inativacao"
+FROM public.cadastro_clientes
