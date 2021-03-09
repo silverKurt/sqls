@@ -1,0 +1,488 @@
+MEMBER [Measures].[var_fat_mensal] AS
+    iif([Measures].[faturamento_ma] >0, ([Measures].[faturamento] / [Measures].[faturamento_ma])-1, NULL), FORMAT_STRING = Iif(([Measures].[faturamento_ma] > 0.0), Iif(([Measures].[var_fat_mensal] <= 0), "|0.00%|style=red", Iif((([Measures].[var_fat_mensal] > 1)), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Cresc. Mensal Fat. Bruto"
+
+
+
+    iif([Measures].[faturamento_ma] > 0, ([Measures].[faturamento] / [Measures].[faturamento_ma])-1, NULL)
+
+
+    Iif(([Measures].[faturamento_ma] > 0.0), Iif(([Measures].[var_fat_mensal] <= 0), "|0.00%|style=red", Iif((([Measures].[var_fat_mensal] > 1)), "|0.00%|style=green", "|0.00%|style=yellow")), NULL)
+
+
+
+    Iif([Measures].[qtd_aa] > 0, ([Measures].[qtd]/[Measures].[qtd_aa])-1, NULL)
+
+    Iif(([Measures].[qtd_aa] > 0.0), Iif(([Measures].[variacao_qtd_anual] <= 0), "|0.00%|style=red", Iif((([Measures].[variacao_qtd_anual] > 1)), "|0.00%|style=green", "|0.00%|style=yellow")), NULL)
+
+
+
+    iif(isEmpty([Measures].[codcliente]), NULL, Aggregate(NonEmptyCrossJoin([houvefaturamento].[Todos].Children, {Except([status].[Todos].Children, [status].[CLIENTE INATIVO])}), [Measures].[codcliente]))
+
+
+SELECT
+NON EMPTY {[Measures].[vlr_devolucao], [Measures].[vlr_venda], [Measures].[perc_devolucao]} ON COLUMNS,
+NON EMPTY Order(Filter([cliente].[Todos].Children, (((NOT IsEmpty([Measures].[vlr_devolucao])) AND (NOT IsEmpty([Measures].[vlr_venda]))) AND (ROUND([Measures].[vlr_devolucao], 2.0) <> ROUND([Measures].[vlr_venda], 2.0)))), [Measures].[perc_devolucao], DESC) ON ROWS
+FROM [FaturamentodeClientes]
+WHERE {([BIMFdata.CurrentMonth])}
+
+
+
+
+    iif(
+    (((([tipofaturame].[DEVOLUÇÃO], [Measures].[faturamento]) * -1) / [Measures].[faturamento]) >= 1) 
+    OR (([tipofaturame].[DEVOLUÇÃO], [Measures].[faturamento]) * -1) >= ([tipofaturame].[VENDA], [Measures].[faturamento])
+    OR IsEmpty(([tipofaturame].[VENDA], [Measures].[faturamento]))
+    , 1,
+    (([tipofaturame].[DEVOLUÇÃO], [Measures].[faturamento]) * -1) / [Measures].[faturamento]
+    )
+
+
+
+<#if filters['Data']??>
+   iif(${filters['Data'].first}.Item(0.0).Hierarchy.Name = "BIMFdata.(Completo)", Aggregate({([BIMFdata.(Completo)].CurrentMember : [BIMFdata.(Completo)].CurrentMember.lag(12.0))}, [Measures].[qtdproduto]), 
+       Aggregate({([data.(Mes)].CurrentMember : [data.(Mes)].CurrentMember.lag(12.0))}, [Measures].[qtdproduto]))
+<#else>
+   Aggregate({([data.(Mes)].CurrentMember : [data.(Mes)].CurrentMember.lag(12.0))}, [Measures].[qtdproduto])
+</#if>
+
+
+
+
+WITH
+MEMBER [Measures].[meta_acumulada] AS
+    Aggregate(PeriodsToDate([data.(Completo)].[Mes]), [Measures].[meta]), $caption = "Meta de Fat. Acumulada"
+MEMBER [Measures].[fat_acumulado] AS
+    Aggregate(PeriodsToDate([data.(Completo)].[Mes]), [Measures].[faturamento]), $caption = "Faturamento Acumulado"
+MEMBER [Measures].[ten_acumulada] AS
+    Aggregate(PeriodsToDate([data.(Completo)].[Mes]), [Measures].[tendencia]), $caption = "Tendência Acumulada"
+SELECT
+NON EMPTY {[Measures].[fat_acumulado], [Measures].[meta_acumulada], [Measures].[ten_acumulada]} ON COLUMNS,
+NON EMPTY Filter({[data.(Completo)].[Dia].Members}, 
+          NOT IsEmpty([Measures].[fat_acumulado]) AND
+          NOT IsEmpty([Measures].[meta_acumulada]) AND
+          NOT IsEmpty([Measures].[ten_acumulada])) ON ROWS
+FROM [FaturamentoxMetas]
+
+
+
+Iif(isEmpty([Measures].[meta]), NULL, Count(Filter([representante].[Todos].Children, (([Measures].[faturamento], [tipofaturamento].[VENDA]) >= [Measures].[meta])))) / 
+(iif(isEmpty([Measures].[meta]), NULL, Count(Filter([representante].[Todos].Children, ((([Measures].[faturamento], [tipofaturamento].[VENDA]) < [Measures].[meta]) OR (IsEmpty(([Measures].[faturamento], [tipofaturamento].[VENDA])) AND ([Measures].[meta] > 0.0))))))
++
+Iif(isEmpty([Measures].[meta]), NULL, Count(Filter([representante].[Todos].Children, (([Measures].[faturamento], [tipofaturamento].[VENDA]) >= [Measures].[meta])))))
+
+
+Este indicador aponta qual a porcentagem da equipe que conseguiu atingir a meta até o presente momento.
+
+KPI: Atingimento da Meta de Representantes
+
+faturamento_ma
+Faturamento do Mês Anterior
+
+<#if filters['Data']??>
+   Aggregate({FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1, ${filters['Data'].first}.Item(0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1, ${filters['Data'].last}.Item(0))}, [Measures].[faturamento])
+<#else>
+   Iif(IsEmpty([Measures].[faturamento]), NULL, 0)
+</#if>
+
+
+faturamento_aa
+Faturamento do Ano Anterior
+
+<#if filters['Data']??>
+   Aggregate({FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1, ${filters['Data'].first}.Item(0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1, ${filters['Data'].last}.Item(0))}, [Measures].[faturamento])
+<#else>
+   Iif(IsEmpty([Measures].[faturamento]), NULL, 0)
+</#if>
+
+variacao_fat_anual
+Variação de Fat. Anual
+Iif([Measures].[faturamento_aa] > 0, ([Measures].[faturamento]/[Measures].[faturamento_aa]) - 1, NULL)
+Iif(([Measures].[faturamento_aa] > 0.0), Iif(([Measures].[variacao_fat_anual] <= 0), "|0.00%|style=red", Iif((([Measures].[variacao_fat_anual] > 1)), "|0.00%|style=green", "|0.00%|style=yellow")), NULL)
+
+variacao_fat_mensal
+Variação de Fat. Mensal
+iif([Measures].[faturamento_ma] > 0, ([Measures].[faturamento] / [Measures].[faturamento_ma])-1, NULL)
+Iif(([Measures].[faturamento_ma] > 0.0), Iif(([Measures].[var_fat_mensal] <= 0), "|0.00%|style=red", Iif((([Measures].[var_fat_mensal] > 1)), "|0.00%|style=green", "|0.00%|style=yellow")), NULL)
+
+qtd_aa
+Quantidade do Ano Anterior
+<#if filters['Data']??>
+   Aggregate({FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1, ${filters['Data'].first}.Item(0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1, ${filters['Data'].last}.Item(0))}, [Measures].[qtd])
+<#else>
+   Iif(IsEmpty([Measures].[qtd]), NULL, 0)
+</#if>
+
+"#,##0.00"
+
+${filters['Data'].first}.Item(0)
+Aggregate({([data.(Mes)].CurrentMember : [data.(Mes)].CurrentMember.lag(12.0))}, [Measures].[qtdproduto])
+
+qtd_ma
+Quantidade do Mês Anterior
+<#if filters['Data']??>
+   Aggregate({FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1, ${filters['Data'].first}.Item(0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1, ${filters['Data'].last}.Item(0))}, [Measures].[qtd])
+<#else>
+   Iif(IsEmpty([Measures].[qtd]), NULL, 0)
+</#if>
+
+
+variacao_qtd_mensal
+Variação de Qtd. Mensal
+Iif([Measures].[qtd_ma] > 0, ([Measures].[qtd]/[Measures].[qtd_ma])-1, NULL)
+Iif(([Measures].[qtd_ma] > 0.0), Iif(([Measures].[variacao_qtd_mensal] <= 0), "|0.00%|style=red", Iif((([Measures].[variacao_qtd_mensal] > 1)), "|0.00%|style=green", "|0.00%|style=yellow")), NULL)
+
+variacao_qtd_anual
+Variação de Qtd. Anual
+Iif([Measures].[qtd_aa] > 0, ([Measures].[qtd]/[Measures].[qtd_aa])-1, NULL)
+Iif(([Measures].[qtd_aa] > 0.0), Iif(([Measures].[variacao_qtd_anual] <= 0), "|0.00%|style=red", Iif((([Measures].[variacao_qtd_anual] > 1)), "|0.00%|style=green", "|0.00%|style=yellow")), NULL)
+
+
+<#if filters['Data']??>
+   Aggregate({FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1, ${filters['Data'].first}.Item(0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1, ${filters['Data'].last}.Item(0))}, [Measures].[volume])
+<#else>
+   Iif(IsEmpty([Measures].[volume]), NULL, 0)
+</#if>
+
+<#if filters['Data']??>
+   Aggregate({FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1, ${filters['Data'].first}.Item(0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1, ${filters['Data'].last}.Item(0))}, [Measures].[volume])
+<#else>
+   Iif(IsEmpty([Measures].[volume]), NULL, 0)
+</#if>
+
+
+Variação de Devolução Anual 
+variacao_dev_anual
+[tipofaturamento].[DEVOLUÇÃO]
+
+Iif(
+    (([tipofaturamento].[DEVOLUÇÃO], [Measures].[faturamento_aa]) * -1) > 0, 
+    ((([tipofaturamento].[DEVOLUÇÃO], [Measures].[faturamento]) * -1)/(([tipofaturamento].[DEVOLUÇÃO], [Measures].[faturamento_aa]) * -1)) - 1,
+    NULL)
+
+Iif((([tipofaturamento].[DEVOLUÇÃO], [Measures].[faturamento_aa]) * -1), Iif(([Measures].[variacao_fat_anual] <= 0), "|0.00%|style=red", Iif((([Measures].[variacao_fat_anual] > 1)), "|0.00%|style=green", "|0.00%|style=yellow")), NULL)
+
+atingimento_vol
+
+Atingimento do Volume
+
+iif([Measures].[volume_ma] > 0, ([Measures].[volume] / [Measures].[volume_ma]), NULL)
+
+Iif(([Measures].[volume_ma] > 0.0), Iif(([Measures].[variacao_vol_mensal] <= 0), "|0.00%|style=red", Iif((([Measures].[variacao_vol_mensal] > 1)), "|0.00%|style=green", "|0.00%|style=yellow")), NULL)
+
+
+NON EMPTY {
+   [Measures].[% Share Fat.]
+   , [Measures].[FaturadoLiquido]
+   , [Measures].[PercVariacaoMA]
+   , [Measures].[PercVariacaoAA]
+   , [Measures].[VLRTOTALDEV]
+   , [Measures].[% Devolução R$]
+   , [Measures].[kgfaturadoliquido]
+   , [Measures].[PercVariacaoKGMA]
+   , [Measures].[PercVariacaoKGAA]
+   , [Measures].[QTDEUNITARIADEV]
+   , [Measures].[% Devolução KG]
+
+} ON COLUMNS,
+
+PERIODOEMISSAO
+PERIODOEMISSAOFILTRO
+
+Fat. Líquido MA
+
+<#if filters['Periodo']??>
+   Aggregate({FixedParallelPeriod([PERIODOEMISSAOFILTRO.(Completo)].[Ano], 1, ${filters['Periodo'].first}.Item(0)) : FixedParallelPeriod([PERIODOEMISSAOFILTRO.(Completo)].[Ano], 1, ${filters['Periodo'].last}.Item(0))}, [Measures].[QTDPRODUTO])
+<#else>
+   Iif(IsEmpty([Measures].[QTDPRODUTO]), NULL, 0)
+</#if>
+
+[Measures].[kgfaturadoliquido]
+[Measures].[QTDPRODUTO]
+
+% Share Fat.
+
+Vlr Fat. Liq.
+% Cresc. MA R$
+% Cresc. AA R$
+Vlr Devol.
+% Devolução R$
+Kg Fat Líq.
+% Cresc. MA K
+% Cresc. AA Kg	
+Kg Devol.	
+% Devolução KG
+
+Iif(([Measures].[liquido_ma] > 0), (([Measures].[FaturadoLiquido] / [Measures].[liquido_ma]) -1), NULL)
+
+
+DataMesAtual
+
+{CurrentDateMember([data.(Mes)], '["data.(Mes)"]\.["Todos"]\.[yyyymm]')}
+
+Aggregate({([dataMesAtual].Item(0.0) : [dataMesAtual].Item(0.0).Lag(3.0))}, ([Measures].[valorpedido], [BIMFdata.(Completo)].[Todos]))
+
+
+PeriodoMesAtual
+{CurrentDateMember([Periodo.(Mes)], '["Periodo.(Mes)"]\.["Todos"]\.[yyyymm]')}
+
+[Measures].[QTDPRODUTO]
+
+<#if filters['Periodo']??>
+   Aggregate({FixedParallelPeriod([PERIODOEMISSAOFILTRO.(Completo)].[Ano], 1, ${filters['Periodo'].first}.Item(0)) : FixedParallelPeriod([PERIODOEMISSAOFILTRO.(Completo)].[Ano], 1, ${filters['Periodo'].last}.Item(0))}, [Measures].[QTDPRODUTO])
+<#else>
+   Iif(IsEmpty([Measures].[QTDPRODUTO]), NULL, 0)
+</#if>
+
+Iif(([Measures].[qtd_produto_aa] > 0), (([Measures].[QTDPRODUTO] / [Measures].[qtd_produto_aa]) -1), NULL)
+Iif([Measures].[variacao_fat_mensal]>0, "|0.00%|arrow=up", "|0.00%|arrow=down")
+
+
+('SUPERVISOR DE VENDAS', 'SUPERVISOR MERCHAN', 'GERENTE DE VENDAS')
+
+
+
+<#if filters['Periodo']??>
+   Aggregate({PeriodsToDate([BIMFPeriodo.(Completo)].[Ano], FixedParallelPeriod([BIMFPeriodo.(Completo)].[Ano], 1, ${filters['Periodo'].last}.Item(0)))}, [Measures].[Faturamento])
+<#else>
+   Iif(IsEmpty([Measures].[Faturamento]), NULL, 0)
+</#if>
+
+<#if filters['Data']??>
+   Aggregate({PeriodsToDate([BIMFdata.(Completo)].[Ano], FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1, ${filters['Data'].last}.Item(0)))}, [Measures].[qtd])
+<#else>
+   Iif(IsEmpty([Measures].[qtd]), NULL, 0)
+</#if>
+
+variacao_qtd_acm
+Variação da Quantidade Acumulada
+Iif([Measures].[qtd_acumulado_aa] > 0, ([Measures].[qtd_acumulado]/[Measures].[qtd_acumulado_aa]) - 1, NULL)
+Iif(([Measures].[qtd_acumulado_aa] > 0.0), Iif(([Measures].[variacao_qtd_acm] <= 0), "|0.00%|style=red", Iif((([Measures].[variacao_qtd_acm] > 1)), "|0.00%|style=green", "|0.00%|style=yellow")), NULL)
+
+variacao_fat_acm
+Variação de Faturamento Acumulado
+Iif([Measures].[faturamento_acumulado_aa] > 0, ([Measures].[faturamento_acumulado]/[Measures].[faturamento_acumulado_aa]) - 1, NULL)
+Iif(([Measures].[faturamento_acumulado_aa] > 0.0), Iif(([Measures].[variacao_fat_acm] <= 0), "|0.00%|style=red", Iif((([Measures].[variacao_fat_acm] > 1)), "|0.00%|style=green", "|0.00%|style=yellow")), NULL)
+
+Count(
+   Filter(
+         [representante].[Todos].Children, 
+         (([Measures].[faturamento], [tipofaturamento].[VENDA]) >= [Measures].[meta])
+   )
+) 
+/
+(Count(
+   Filter(
+         [representante].[Todos].Children, 
+         (([Measures].[faturamento], [tipofaturamento].[VENDA]) >= [Measures].[meta])
+   )
+) 
++ 
+Count(
+   Filter(
+         [representante].[Todos].Children, 
+         ((([Measures].[faturamento], [tipofaturamento].[VENDA]) < [Measures].[meta]) 
+         OR 
+         (IsEmpty(([Measures].[faturamento], [tipofaturamento].[VENDA])) 
+         AND 
+         ([Measures].[meta] > 0.0)))
+   )
+))
+
+WITH
+MEMBER [Measures].[QuantidadeEstoque2] AS
+    [Measures].[QuantidadeEstoque], FORMAT_STRING = iif(([Measures].[QuantidadeEstoque] = 0.0), "|0.00|style=red", "|0.00|"), $caption = "Qtd. de Estoque"
+MEMBER [CentrodeArmazenagem].[TOTAL] AS
+    [CentrodeArmazenagem].[Todos]
+SELECT
+NON EMPTY NonEmptyCrossJoin({[CentrodeArmazenagem].[NAO INFORMADO], [CentrodeArmazenagem].[0   ], [CentrodeArmazenagem].[00  ], [CentrodeArmazenagem].[001 ], [CentrodeArmazenagem].[002 ], [CentrodeArmazenagem].[003 ], [CentrodeArmazenagem].[005 ], [CentrodeArmazenagem].[0201], [CentrodeArmazenagem].[1   ], [CentrodeArmazenagem].[100 ], [CentrodeArmazenagem].[200 ], [CentrodeArmazenagem].[201 ], [CentrodeArmazenagem].[2211], [CentrodeArmazenagem].[300 ], [CentrodeArmazenagem].[301 ], [CentrodeArmazenagem].[302 ], [CentrodeArmazenagem].[303 ], [CentrodeArmazenagem].[304 ], [CentrodeArmazenagem].[305 ], [CentrodeArmazenagem].[306 ], [CentrodeArmazenagem].[307 ], [CentrodeArmazenagem].[308 ], [CentrodeArmazenagem].[309 ], [CentrodeArmazenagem].[310 ], [CentrodeArmazenagem].[312 ], [CentrodeArmazenagem].[350 ], [CentrodeArmazenagem].[360 ], [CentrodeArmazenagem].[370 ], [CentrodeArmazenagem].[399 ], [CentrodeArmazenagem].[400 ], [CentrodeArmazenagem].[401 ], [CentrodeArmazenagem].[404 ], [CentrodeArmazenagem].[405 ], [CentrodeArmazenagem].[406 ], [CentrodeArmazenagem].[420 ], [CentrodeArmazenagem].[4320], [CentrodeArmazenagem].[5   ], [CentrodeArmazenagem].[500 ], [CentrodeArmazenagem].[5006], [CentrodeArmazenagem].[5007], [CentrodeArmazenagem].[5500], [CentrodeArmazenagem].[6   ], [CentrodeArmazenagem].[600 ], [CentrodeArmazenagem].[610 ], [CentrodeArmazenagem].[620 ], [CentrodeArmazenagem].[630 ], [CentrodeArmazenagem].[640 ], [CentrodeArmazenagem].[650 ], [CentrodeArmazenagem].[700 ], [CentrodeArmazenagem].[701 ], [CentrodeArmazenagem].[702 ], [CentrodeArmazenagem].[703 ], [CentrodeArmazenagem].[704 ], [CentrodeArmazenagem].[705 ], [CentrodeArmazenagem].[706 ], [CentrodeArmazenagem].[707 ], [CentrodeArmazenagem].[708 ], [CentrodeArmazenagem].[709 ], [CentrodeArmazenagem].[710 ], [CentrodeArmazenagem].[711 ], [CentrodeArmazenagem].[712 ], [CentrodeArmazenagem].[713 ], [CentrodeArmazenagem].[714 ], [CentrodeArmazenagem].[715 ], [CentrodeArmazenagem].[717 ], [CentrodeArmazenagem].[718 ], [CentrodeArmazenagem].[719 ], [CentrodeArmazenagem].[720 ], [CentrodeArmazenagem].[721 ], [CentrodeArmazenagem].[722 ], [CentrodeArmazenagem].[723 ], [CentrodeArmazenagem].[724 ], [CentrodeArmazenagem].[725 ], [CentrodeArmazenagem].[726 ], [CentrodeArmazenagem].[727 ], [CentrodeArmazenagem].[728 ], [CentrodeArmazenagem].[729 ], [CentrodeArmazenagem].[731 ], [CentrodeArmazenagem].[732 ], [CentrodeArmazenagem].[733 ], [CentrodeArmazenagem].[734 ], [CentrodeArmazenagem].[735 ], [CentrodeArmazenagem].[737 ], [CentrodeArmazenagem].[738 ], [CentrodeArmazenagem].[739 ], [CentrodeArmazenagem].[740 ], [CentrodeArmazenagem].[741 ], [CentrodeArmazenagem].[742 ], [CentrodeArmazenagem].[743 ], [CentrodeArmazenagem].[744 ], [CentrodeArmazenagem].[745 ], [CentrodeArmazenagem].[746 ], [CentrodeArmazenagem].[747 ], [CentrodeArmazenagem].[748 ], [CentrodeArmazenagem].[749 ], [CentrodeArmazenagem].[750 ], [CentrodeArmazenagem].[80  ], [CentrodeArmazenagem].[80,0], [CentrodeArmazenagem].[800 ], [CentrodeArmazenagem].[800'], [CentrodeArmazenagem].[8000], [CentrodeArmazenagem].[800V], [CentrodeArmazenagem].[801 ], [CentrodeArmazenagem].[8020], [CentrodeArmazenagem].[8024], [CentrodeArmazenagem].[8500], [CentrodeArmazenagem].[998 ], [CentrodeArmazenagem].[F001], [CentrodeArmazenagem].[F002], [CentrodeArmazenagem].[MAX ], [CentrodeArmazenagem].[O   ], [CentrodeArmazenagem].[TOK ], [CentrodeArmazenagem].[WMS ], [CentrodeArmazenagem].[TOTAL]}, {[Measures].[QuantidadeEstoque2]}) ON COLUMNS,
+NON EMPTY Filter(Order(NonEmptyCrossJoin([cdmaterial].[Todos].Children, NonEmptyCrossJoin([CodEspecifico].[Todos].Children, [ReferenciaCompleta].[Todos].Children)), [Measures].[QuantidadeEstoque2], BASC), [Measures].[QuantidadeEstoque2] < 30) ON ROWS
+FROM [Estoque]
+WHERE NonEmptyCrossJoin({([TipodeProducao].[INJETADO - INATIVOS])}, [BIMFperiodo.CurrentMonth])
+
+
+Compradores Assíduos - Compram bastante e frequentemente
+Clientes Leais - Compram relativamente bem e 
+Clientes Promissores
+
+Clientes em risco
+Clientes que não podemos perder
+
+
+prod_por_atendimento_aa
+
+Iif([Measures].[prod_por_atendimento_aa] > 0, ([Measures].[prod_por_atendimento]/[Measures].[prod_por_atendimento_aa])-1, NULL)
+
+Iif(([Measures].[prod_por_atendimento_aa] > 0.0), Iif(([Measures].[variacao_pa_anual] <= 0), "|0.00%|style=red", Iif((([Measures].[variacao_pa_anual] > 1)), "|0.00%|style=green", "|0.00%|style=yellow")), NULL)
+
+
+WITH
+MEMBER [Measures].[cobertura_mix] AS
+    iif(([Measures].[produtos_ativos] > 0.0), ([Measures].[qtdproduto] / [Measures].[produtos_ativos]), NULL), FORMAT_STRING = "Percent", $caption = "Cobertura do MIX"
+MEMBER [Measures].[faturamento_aa] AS
+    Aggregate({(FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1.0, [BIMFdata.CurrentMonth].Item(0.0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1.0, [BIMFdata.CurrentMonth].Item(0.0)))}, [Measures].[faturamento]), FORMAT_STRING = "Currency", $caption = "Faturamento do Ano Anterior"
+MEMBER [Measures].[qtd_aa] AS
+    Aggregate({(FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1.0, [BIMFdata.CurrentMonth].Item(0.0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1.0, [BIMFdata.CurrentMonth].Item(0.0)))}, [Measures].[qtd]), FORMAT_STRING = "Standard", $caption = "Quantidade do Ano Anterior"
+MEMBER [Measures].[preco_medio_aa] AS
+    ([Measures].[faturamento_aa] / [Measures].[qtd_aa]), FORMAT_STRING = "Currency", $caption = "Preço Médio do Ano Anterior"
+MEMBER [Measures].[var_preco_anual] AS
+    iif(([Measures].[preco_medio_aa] > 0.0), (([Measures].[preco_medio] / [Measures].[preco_medio_aa]) - 1.0), NULL), FORMAT_STRING = "Percent", $caption = "Variação de Preço Anual"
+MEMBER [Measures].[produtos_ativos] AS
+    Aggregate({([BIMFdata.(Completo)].CurrentMember : [BIMFdata.(Completo)].CurrentMember.lag(12.0))}, [Measures].[qtdproduto]), FORMAT_STRING = "Standard", $caption = "Mix de Produtos Ativos"
+MEMBER [Measures].[variacao_fat_anual] AS
+    Iif(([Measures].[faturamento_aa] > 0.0), (([Measures].[faturamento] / [Measures].[faturamento_aa]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[faturamento_aa] > 0.0), Iif(([Measures].[variacao_fat_anual] <= 0.0), "|0.00%|style=red", Iif(([Measures].[variacao_fat_anual] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Variação de Fat. Anual"
+MEMBER [Measures].[qtd_ma] AS
+    Aggregate({(FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1.0, [BIMFdata.CurrentMonth].Item(0.0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1.0, [BIMFdata.CurrentMonth].Item(0.0)))}, [Measures].[qtd]), FORMAT_STRING = "#,##0.00", $caption = "Quantidade do Mês Anterior"
+MEMBER [Measures].[faturamento_ma] AS
+    Aggregate({(FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1.0, [BIMFdata.CurrentMonth].Item(0.0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1.0, [BIMFdata.CurrentMonth].Item(0.0)))}, [Measures].[faturamento]), FORMAT_STRING = "Currency", $caption = "Faturamento do Mês Anterior"
+MEMBER [Measures].[variacao_fat_mensal] AS
+    iif(([Measures].[faturamento_ma] > 0.0), (([Measures].[faturamento] / [Measures].[faturamento_ma]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[faturamento_ma] > 0.0), Iif(([Measures].[var_fat_mensal] <= 0.0), "|0.00%|style=red", Iif(([Measures].[var_fat_mensal] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Variação de Fat. Mensal"
+MEMBER [Measures].[variacao_qtd_mensal] AS
+    Iif(([Measures].[qtd_ma] > 0.0), (([Measures].[qtd] / [Measures].[qtd_ma]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[qtd_ma] > 0.0), Iif(([Measures].[variacao_qtd_mensal] <= 0.0), "|0.00%|style=red", Iif(([Measures].[variacao_qtd_mensal] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Variação de Qtd. Mensal"
+MEMBER [Measures].[variacao_qtd_anual] AS
+    Iif(([Measures].[qtd_aa] > 0.0), (([Measures].[qtd] / [Measures].[qtd_aa]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[qtd_aa] > 0.0), Iif(([Measures].[variacao_qtd_anual] <= 0.0), "|0.00%|style=red", Iif(([Measures].[variacao_qtd_anual] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Variação de Qtd. Anual"
+MEMBER [Measures].[atingimento_ma] AS
+    Iif((([Measures].[faturamento] > 0.0) AND ([Measures].[faturamento_ma] > 0.0)), ([Measures].[faturamento] / [Measures].[faturamento_ma]), 0.0), FORMAT_STRING = "Percent", $caption = "Atingimento Mensal de Faturamento"
+MEMBER [Measures].[atingimento_aa] AS
+    Iif((([Measures].[faturamento] > 0.0) AND ([Measures].[faturamento_aa] > 0.0)), ([Measures].[faturamento] / [Measures].[faturamento_aa]), 0.0), FORMAT_STRING = "Percent", $caption = "Atingimento Anual de Faturamento"
+MEMBER [Measures].[atingimento_qtd_ma] AS
+    Iif((([Measures].[qtd] > 0.0) AND ([Measures].[qtd_ma] > 0.0)), ([Measures].[qtd] / [Measures].[qtd_ma]), 0.0), FORMAT_STRING = "Percent", $caption = "Atingimento Mensal de Qtd Faturada"
+MEMBER [Measures].[atingimento_qtd_aa] AS
+    Iif((([Measures].[qtd] > 0.0) AND ([Measures].[qtd_aa] > 0.0)), ([Measures].[qtd] / [Measures].[qtd_aa]), 0.0), FORMAT_STRING = "Percent", $caption = "Atingimento Anual de Qtd Faturada"
+MEMBER [Measures].[qtd_clientes_ma] AS
+    Aggregate({(FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1.0, [BIMFdata.CurrentMonth].Item(0.0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1.0, [BIMFdata.CurrentMonth].Item(0.0)))}, [Measures].[qtdcliente]), FORMAT_STRING = "Standard", $caption = "Clientes do Mês Anterior"
+MEMBER [Measures].[qtd_clientes_aa] AS
+    Aggregate({(FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1.0, [BIMFdata.CurrentMonth].Item(0.0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1.0, [BIMFdata.CurrentMonth].Item(0.0)))}, [Measures].[qtdcliente]), FORMAT_STRING = "Standard", $caption = "Clientes do Ano Anterior"
+MEMBER [Measures].[variacao_dev_anual] AS
+    Iif(((([tipofaturamento].[DEVOLUÇÃO], [Measures].[faturamento_aa]) * (- 1.0)) > 0.0), (((([tipofaturamento].[DEVOLUÇÃO], [Measures].[faturamento]) * (- 1.0)) / (([tipofaturamento].[DEVOLUÇÃO], [Measures].[faturamento_aa]) * (- 1.0))) - 1.0), NULL), FORMAT_STRING = Iif((([tipofaturamento].[DEVOLUÇÃO], [Measures].[faturamento_aa]) * (- 1.0)), Iif(([Measures].[variacao_dev_anual] <= 0.0), "|0.00%|style=red", Iif(([Measures].[variacao_dev_anual] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Variação de Devolução Anual"
+MEMBER [Measures].[share] AS
+    ([Measures].[faturamento] / ([produto].[Todos], [Measures].[faturamento])), Format_String = "Percent", $caption = "Participação do Prod."
+MEMBER [Measures].[rank] AS
+    Iif(([Measures].[faturamento] <> 0.0), Rank([produto].CurrentMember, Order([produto].[Todos].Children, [Measures].[faturamento], BDESC)), NULL), Format_String = "Standard", $caption = "Rank Atual"
+MEMBER [Measures].[ABC Atual] AS
+    Iif(([Measures].[faturamento] <> 0.0), Sum(Head(Order([produto].[Todos].Children, [Measures].[faturamento], BDESC), [Measures].[rank]), [Measures].[faturamento]), NULL)
+MEMBER [Measures].[% ABC] AS
+    ([Measures].[ABC Atual] / ([produto].[Todos], [Measures].[faturamento])), Format_String = Iif(([Measures].[% ABC] <= 0.7), "|0.00%|style=green", Iif(([Measures].[% ABC] < 0.9), "|0.00%|style=yellow", "|0.00%|style=red"))
+MEMBER [Measures].[qtd_produtos_aa] AS
+    Aggregate({(FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1.0, [BIMFdata.CurrentMonth].Item(0.0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1.0, [BIMFdata.CurrentMonth].Item(0.0)))}, [Measures].[qtdproduto]), FORMAT_STRING = "#,##0.00", $caption = "Produtos do Ano Anterior"
+MEMBER [Measures].[prod_por_atendimento_aa] AS
+    ([Measures].[qtd_produtos_aa] / [Measures].[qtd_clientes_aa]), FORMAT_STRING = "#,##0.00", $caption = "Prod. por Atendimento do Ano Anterior"
+MEMBER [Measures].[variacao_pa_anual] AS
+    Iif(([Measures].[prod_por_atendimento_aa] > 0.0), (([Measures].[prod_por_atendimento] / [Measures].[prod_por_atendimento_aa]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[prod_por_atendimento_aa] > 0.0), Iif(([Measures].[variacao_pa_anual] <= 0.0), "|0.00%|style=red", Iif(([Measures].[variacao_pa_anual] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Variação de Prod. por Atend. Anual"
+SELECT
+NON EMPTY {[Measures].[faturamento], [Measures].[faturamento_aa], [Measures].[variacao_fat_anual], [Measures].[share], [Measures].[rank]} ON COLUMNS,
+NON EMPTY TopCount(Order(Filter([produto].[Todos].Children, (NOT IsEmpty([Measures].[faturamento]))), [Measures].[rank], ASC), 100.0, [Measures].[rank]) ON ROWS
+FROM [FaturamentodoProduto]
+WHERE NonEmptyCrossJoin({([tipofaturamento].[VENDA])}, [BIMFdata.CurrentMonth])
+
+KPI: Variação do Preço Médio Anual
+Percentual representativo de quanto o preço médio cresceu da mesma data selecionada no Ano Anterior para o corrente.
+
+
+WITH
+
+MEMBER [Measures].[meta_acumulada] AS
+    Aggregate(PeriodsToDate([data.(DiaMes)].[Todos]), [Measures].[meta]), $caption = "Meta de Fat. Acumulada"
+
+MEMBER [Measures].[fat_acumulado] AS
+    Aggregate(PeriodsToDate([data.(DiaMes)].[Todos]), [Measures].[faturamento]), $caption = "Faturamento Acumulado"
+
+MEMBER [Measures].[ten_acumulada] AS
+    (([Measures].[fat_acumulado] / [Measures].[rank]) * [Measures].[diasuteismes]), $caption = "Tendência Acumulada"
+
+MEMBER [Measures].[rank] AS
+    Iif(([Measures].[fat_acumulado] <> 0.0), Rank([data.(DiaMes)].CurrentMember, 
+            Filter(Order([data.(DiaMes)].[Todos].Children, [Measures].[fat_acumulado], ASC), (NOT IsEmpty([Measures].[meta]))) 
+        ), NULL), Format_String = "Standard", $caption = "Rank Atual"
+SELECT
+NON EMPTY {[Measures].[fat_acumulado], [Measures].[meta_acumulada], [Measures].[ten_acumulada]} ON COLUMNS,
+NON EMPTY Filter({[data.(DiaMes)].[Todos].Children}, NOT IsEmpty([Measures].[meta])) ON ROWS
+FROM [FaturamentoxMetas]
+WHERE {([BIMFdata.LastMonth])}
+
+WITH
+MEMBER [Measures].[Clientes] AS
+    [Measures].[qtdclientes], format_string = 
+    
+    Iif(
+        (((([faixafrequencia].CurrentMember.Name = "F4 - ENTRE 51 E 100 COMPRAS") OR ([faixafrequencia].CurrentMember.Name = "F5 - MAIS QUE 100 COMPRAS")) 
+            AND (([faixarecencia].CurrentMember.Name = "R4 - DE 61 A 120 DIAS") OR ([faixarecencia].CurrentMember.Name = "R5 - ATÉ 60 DIAS"))
+        ) OR (([faixafrequencia].CurrentMember.Name = "F3 - ENTRE 31 E 50 COMPRAS" AND [faixarecencia].CurrentMember.Name = "R5 - ATÉ 60 DIAS"))), 
+        
+        "|0|customCss=background-color:\#269C59", 
+        
+        iif(
+
+            ((([faixafrequencia].CurrentMember.Name = "F2 - ENTRE 11 E 30 COMPRAS" OR [faixafrequencia].CurrentMember.Name = "F1 - ATÉ 10 COMPRAS") AND ([faixarecencia].CurrentMember.Name = "R4 - DE 61 A 120 DIAS" OR [faixarecencia].CurrentMember.Name = "R5 - ATÉ 60 DIAS")) OR ([faixafrequencia].CurrentMember.Name = "F3 - ENTRE 31 E 50 COMPRAS" AND [faixarecencia].CurrentMember.Name = "R4 - DE 61 A 120 DIAS")), 
+
+            "|0|customCss=background-color:\#79A93B",
+
+            iif(
+
+                [faixarecencia].CurrentMember.Name = "R3 - DE 121 A 180 DIAS",
+
+                "|0|customCss=background-color:\#FEC447",
+
+                iif(
+
+                    (([faixafrequencia].CurrentMember.Name = "F2 - ENTRE 11 E 30 COMPRAS" OR [faixafrequencia].CurrentMember.Name = "F1 - ATÉ 10 COMPRAS") AND ([faixarecencia].CurrentMember.Name = "R1 - INATIVO" OR [faixarecencia].CurrentMember.Name = "R2 - DE 181 A 270 DIAS")) OR ([faixafrequencia].CurrentMember.Name = "F3 - ENTRE 31 E 50 COMPRAS" AND [faixarecencia].CurrentMember.Name = "R2 - DE 181 A 270 DIAS"),
+
+                    "|0|customCss=background-color:\#ED8C3\0",
+
+                    "|0|customCss=background-color:\#EB354D"
+
+                )
+
+
+            )
+
+        )
+    )
+            
+SELECT
+NON EMPTY {[faixarecencia].[R1 - INATIVO], [faixarecencia].[R2 - DE 181 A 270 DIAS], [faixarecencia].[R3 - DE 121 A 180 DIAS], [faixarecencia].[R4 - DE 61 A 120 DIAS], [faixarecencia].[R5 - ATÉ 60 DIAS]} ON COLUMNS,
+NON EMPTY NonEmptyCrossJoin({[faixafrequencia].[F1 - ATÉ 10 COMPRAS], [faixafrequencia].[F2 - ENTRE 11 E 30 COMPRAS], [faixafrequencia].[F3 - ENTRE 31 E 50 COMPRAS], [faixafrequencia].[F4 - ENTRE 51 E 100 COMPRAS], [faixafrequencia].[F5 - MAIS QUE 100 COMPRAS]}, {[Measures].[Clientes]}) ON ROWS
+FROM [Clientes]
+
+Qual o faturamento do representante?
+Indicadores que apontam o faturamento do representante no mês anterior e ano anterior com a finalidade de oferecer uma visão de crescimento.
+
+E a quantidade vendida?
+Indicadores que possibilitam a comparação do faturamento do representante com a quantidade vendida.
+
+E qual o seu MIX comercializado?
+Indicadores responsáveis por apontar a cobertura do MIX do representante de forma que possa ser extraída a informação de quanto já foi comercializado e o quanto falta.
+
+Qual o seu ticket médio por cliente?
+Esse indicador mostra a venda média do representante, assim como o seu histórico. Em performance, é possível verificar qual a diferença do ticket contra a sua média nos últimos doze meses. Caso a performance esteja positiva, significa que a sua venda é superior à média histórica.
+
+Qual foi a performance do vendedor nos últimos doze meses?
+Esse gráfico traz o faturamento do representante em comparação com a meta. Caso o mês em específico encontre-se em azul, significa que o vendedor não atingiu a meta naquele mês.
+
+Qual foi o total devolvido?
+Aqui é possível identificar o total retornado em devoluções, assim como o seu histórico. Em performance, é possível verificar quanto o representante cedeu em comparação com a sua média nos últimos doze meses. Caso a performance esteja em azul, significa que o vendedor teve menos devoluções que a sua média
+
+Quanto foi devolvido por grupo de produto?
+Gráfico com o intuito de apontar quais os grupos com maiores índices de devolução da empresa.
+
+Quais grupos de produtos vender?
+Tabela que identifica aqueles grupos que já foram comercializados no mês atual e os que ainda precisam ser.
+
+O que o representante mais vende?
+Aqui é possível verificar quais grupos são mais vendidos, assim como a variação entre os preços médios praticados pelo representante em comparação com a média do time.
+
+Relatório de Clientes Inativos da Carteira
+Relatório de clientes inativos com mais de 6 meses sem realizar compra.
+
+Relatório de Clientes e Representantes em Risco e que Não Podemos Perder
+Este relatório lista a relação de representantes e clientes que estão em risco, ou seja, que compraram entre 181 dias à 270 dias e fizeram poucas compras. Além disso, também lista aqueles que não podemos perder que são caracterizados por muitas compras entre 181 dias à 270 dias.
+
+
+E a média da venda de produtos?
+Este indicadores colocam a média de quantos produtos acabam sendo vendidos por atendimento (ou nota).
+
+A margem gerencial corresponde ao valor de lucratividade bruta, ao considerar o total faturado e retirar os custos totais e descontos deste valor.
+
+1/1 65/1 (considerar somente quantidade)
+
+se o horário que o almoço começou for menor do que a data de fim do último pdv então é ignorado e seguido a regra
+

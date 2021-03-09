@@ -1,0 +1,41 @@
+WITH
+MEMBER [Measures].[%] AS
+    ([Measures].[QuantidadeMesAnterior] / ([Measures].[QuantidadeMesAnterior], [ReferenciaCompleta].[Todos], [CodEspecifico].[Todos])), FORMAT_STRING = "Percent"
+MEMBER [Measures].[% ABC] AS
+    ([Measures].[QuantidadeMesACM] / ([Measures].[QuantidadeMesAnterior], [ReferenciaCompleta].[Todos], [CodEspecifico].[Todos])), FORMAT_STRING = Iif(([Measures].[% ABC] <= 0.7), "|0.00%|style=green", Iif(([Measures].[% ABC] <= 0.9), "|0.00%|style=yellow", "|0.00%|style=red"))
+MEMBER [Measures].[Curva] AS
+    Iif(((((NOT IsEmpty([Measures].[QuantidadeMesAnterior])) OR (NOT IsEmpty([Measures].[QuantidadeMediaMes]))) OR (NOT IsEmpty([Measures].[LoteMinimoRealizado]))) OR (NOT IsEmpty([Measures].[QuantidadeEstoque]))), Iif(([Measures].[% ABC] <= 0.7), "A", Iif(([Measures].[% ABC] <= 0.9), "B", "C")), NULL), FORMAT_STRING = Iif(([Measures].[% ABC] <= 0.7), "|A|style=green", Iif(([Measures].[% ABC] <= 0.9), "|B|style=yellow", "|C|style=red"))
+MEMBER [Measures].[% atend. Estoque] AS
+    Iif((([Measures].[QuantidadeEstoque] = 0.0) OR IsEmpty([Measures].[LoteMinimoRealizado])), 0.0, ([Measures].[QuantidadeEstoque] / [Measures].[LoteMinimoRealizado])), FORMAT_STRING = "Percent"
+MEMBER [Measures].[MAPE] AS
+    ABS((([Measures].[QuantidadeMesAnterior] - [Measures].[LoteMinimoRealizado]) / [Measures].[QuantidadeMesAnterior])), FORMAT_STRING = "Percent"
+MEMBER [Measures].[Tendencia MAPE] AS
+    (([Measures].[QuantidadeMesAnterior] - [Measures].[LoteMinimoRealizado]) / [Measures].[QuantidadeMesAnterior]), FORMAT_STRING = Iif((([Measures].[Tendencia MAPE]) > (0.0)), "||image=/resources/images/kpi/Arrow_Status_Asc3\.gif", "||image=/resources/images/kpi/Arrow_Status_Asc1\.gif")
+SELECT
+NON EMPTY {[Measures].[QuantidadeMesAnterior], [Measures].[QuantidadeMedia], [Measures].[Quantidade], [Measures].[LoteMinimoRealizado], [Measures].[QuantidadeEstoque], [Measures].[Curva], [Measures].[%], [Measures].[% ABC], [Measures].[% atend. Estoque], [Measures].[MAPE], [Measures].[Tendencia MAPE]} ON COLUMNS,
+NON EMPTY Filter(Order(NonEmptyCrossJoin([CodEspecifico].[Todos].Children, [ReferenciaCompleta].[Todos].Children), [Measures].[QuantidadeMesAnterior], BDESC), ((([Measures].[QuantidadeMedia] >= 1.0) OR ([Measures].[QuantidadeEstoque] <> 0.0)) AND ([Measures].[LoteMinimoRealizado] > 0.0))) ON ROWS
+FROM [MovimentoXEstoqueABCItens]
+WHERE CrossJoin({[CurvaABC].[A], [CurvaABC].[B], [CurvaABC].[C]}, {([UnidadedeNegocio].[OU])})
+
+
+
+WITH
+MEMBER [Measures].[%] AS
+    ([Measures].[QuantidadeMesAnterior] / ([Measures].[QuantidadeMesAnterior], [ReferenciaCompleta].[Todos])), FORMAT_STRING = "Percent"
+MEMBER [Measures].[% ABC] AS
+    ([Measures].[QuantidadeMesACM] / ([Measures].[QuantidadeMesAnterior], [ReferenciaCompleta].[Todos])), FORMAT_STRING = Iif(([Measures].[% ABC] <= 0.7), "|0.00%|style=green", Iif(([Measures].[% ABC] <= 0.9), "|0.00%|style=yellow", "|0.00%|style=red"))
+MEMBER [Measures].[Curva] AS
+    Iif(((((NOT IsEmpty([Measures].[QuantidadeMesAnterior])) OR (NOT IsEmpty([Measures].[QuantidadeMediaMes]))) OR (NOT IsEmpty([Measures].[LoteMinimoRealizado]))) OR (NOT IsEmpty([Measures].[QuantidadeEstoque]))), Iif(([Measures].[% ABC] <= 0.7), "A", Iif(([Measures].[% ABC] <= 0.9), "B", "C")), NULL), FORMAT_STRING = Iif(([Measures].[% ABC] <= 0.7), "|A|style=green", Iif(([Measures].[% ABC] <= 0.9), "|B|style=yellow", "|C|style=red"))
+MEMBER [Measures].[% atend. Estoque] AS
+    Iif((([Measures].[QuantidadeEstoque] = 0.0) OR IsEmpty([Measures].[LoteMinimoRealizado])), NULL, ([Measures].[QuantidadeEstoque] / [Measures].[LoteMinimoRealizado])), FORMAT_STRING = "Percent"
+MEMBER [Measures].[MAPE] AS
+    Iif((([Measures].[QuantidadeMesAnterior] > 0.0) AND ([Measures].[LoteMinimoRealizado] > 0.0)), ABS((([Measures].[QuantidadeMesAnterior] - [Measures].[LoteMinimoRealizado]) / [Measures].[QuantidadeMesAnterior])), NULL), FORMAT_STRING = "Percent"
+MEMBER [Measures].[Tendencia MAPE] AS
+    (([Measures].[QuantidadeMesAnterior] - [Measures].[LoteMinimoRealizado]) / [Measures].[QuantidadeMesAnterior]), FORMAT_STRING = Iif((([Measures].[Tendencia MAPE]) > (0.0)), "||image=/resources/images/kpi/Arrow_Status_Asc3\.gif", "||image=/resources/images/kpi/Arrow_Status_Asc1\.gif")
+MEMBER [Measures].[Media MAPE] AS
+    AVG([ReferenciaCompleta].[Todos].Children, [Measures].[MAPE])
+SELECT
+NON EMPTY {[Measures].[Media MAPE], [Measures].[QuantidadeMesAnterior], [Measures].[LoteMinimoRealizado]} ON COLUMNS,
+NON EMPTY {[CurvaABC].[A], [CurvaABC].[B], [CurvaABC].[C]} ON ROWS
+FROM [MovimentoXEstoqueABCItens]
+WHERE {([UnidadedeNegocio].[OU])}

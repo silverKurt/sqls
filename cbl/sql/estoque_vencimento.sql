@@ -133,13 +133,9 @@ FROM public.crosstab(
     , tsk.loc_id 
     , tsk.tsk_situation as "Situação Tarefa"
     , tsk.tsk_scheduleinitialdatehour as "Data Inicio Previsto"
-    --, tsk.tsk_scheduleinitialdatehour as "Data Inicio Previsto Filtro"
     , tsk.tsk_schedulefinaldatehour as "Data Fim Previsto"
-    --, tsk.tsk_schedulefinaldatehour as "Data Fim Previsto Filtro"
     , tsk.tsk_realinitialdatehour as "Data Inicio"
-    --, tsk.tsk_realinitialdatehour as "Data Inicio Filtro"
     , tsk.tsk_realfinaldatehour as "Data Fim"
-    --, tsk.tsk_realfinaldatehour as "Data Fim Filtro"
     
     /* HISTORICO */
     , acf.acf_description as campo
@@ -236,6 +232,7 @@ AS
      , "Data Validade" TIMESTAMP
      , "Horário de Trabalho" VARCHAR(255)
      , "Informe o preço da Bandeja" VARCHAR(255)
+     , "Informe o preço do leite em pó" VARCHAR(255)
      , "Motivo" VARCHAR(255)
      , "Nº Pedido" VARCHAR(255)
      , "Quantidade Estoque" DOUBLE PRECISION

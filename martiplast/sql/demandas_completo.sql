@@ -1,5 +1,4 @@
-
-SELECT top 100 /*ltrim(rtrim(b.cd_material)) + ' - ' + ltrim(rtrim(b.descricao)) + COALESCE(' - ' +
+SELECT ltrim(rtrim(b.cd_material)) + ' - ' + ltrim(rtrim(b.descricao)) + COALESCE(' - ' +
         ( SELECT ltrim(dbo.cg_fc_monta_descr_ident(':1',substring(i.cd_carac,1,CHARINDEX(';',i.Cd_Carac,2)),0,0,b.campo82,0,' '))
          FROM ppident i(nolock)
          WHERE i.identificador = a.Especif1
@@ -9,10 +8,14 @@ SELECT top 100 /*ltrim(rtrim(b.cd_material)) + ' - ' + ltrim(rtrim(b.descricao))
          FROM ppident i(nolock)
          WHERE i.identificador = a.Especif1
          AND i.Sequencial = 1 ), ' ')                            AS 'Referencia',
-       ltrim(rtrim(b.referencia))  + '-' + ltrim(rtrim(b.descricao)) AS 'Referencia sem Cor',
-       */ltrim(dbo.cg_fc_monta_descr_ident(':1',substring(k.cd_carac,1,CHARINDEX(';',k.Cd_Carac,2)),0,0,b.campo82,0,' ')) AS 'Cor',
+       ( SELECT ltrim(dbo.cg_fc_monta_descr_ident(':1',substring(i.cd_carac,1,CHARINDEX(';',i.Cd_Carac,2)),0,0,b.campo82,0,' '))
+         FROM ppident i(nolock)
+         WHERE i.identificador = a.Especif1
+         AND i.Sequencial = 1 )                            AS 'Cor',
        substring(TRIM(';' FROM substring(k.cd_carac,1,CHARINDEX(';',k.Cd_Carac,2))), 4, LEN(substring(k.cd_carac,1,CHARINDEX(';',k.Cd_Carac,2)))) as "Cor Abre",
-       ia.Pr_tabela as "Tabela de Preços",
+       ltrim(rtrim(b.referencia)) AS 'Referencia sem Cor',
+       ltrim(rtrim(b.descricao))						   AS 'Descricao Material',
+       a.cd_material                                       AS "Cod Material",
        a.liberacao                                         AS 'Liberação',
        (CASE WHEN a.liberacao != '' THEN 'C/Liberação' else 'S/Liberação' end) AS 'Status Liberacao',
        a.liberacao                                         AS 'Qtde Liberação',
@@ -33,7 +36,6 @@ SELECT top 100 /*ltrim(rtrim(b.cd_material)) + ' - ' + ltrim(rtrim(b.descricao))
        dt_programada                                       AS 'Periodo Filtro',
        Dt_liberacao                                        AS "Periodo Liberacao",
        a.Especif1                                          AS "Especificador",
-       a.cd_material                                       AS "Cod Material",
        (CASE WHEN ((SELECT sum(d.quantidade)
                     FROM ESESTOQU d (nolock)
                     WHERE d.cd_material = a.cd_material AND 
@@ -141,9 +143,8 @@ SELECT top 100 /*ltrim(rtrim(b.cd_material)) + ' - ' + ltrim(rtrim(b.descricao))
     , CONCAT((CASE WHEN LTRIM(RTRIM(g.linha_produto)) IS NULL OR LTRIM(RTRIM(g.linha_produto)) = '' THEN '0' ELSE LTRIM(RTRIM(g.linha_produto)) END), ' - ', (CASE WHEN UPPER(LTRIM(RTRIM(tlp.descricao))) IS NULL OR UPPER(LTRIM(RTRIM(tlp.descricao))) = '' THEN 'NAO INFORMADO' ELSE UPPER(LTRIM(RTRIM(tlp.descricao))) END)) AS "Linha Produto"  
     
 FROM ESDEMAND        a(nolock)
-INNER JOIN PPIDENT   k(nolock) ON (a.Especif1 = k.Identificador)
+LEFT JOIN PPIDENT k (nolock) ON a.Especif1 = k.Identificador
 LEFT JOIN ESMATERI   b(nolock) ON (b.cd_material = a.cd_material)
-LEFT JOIN FAITEMPE   ia(NOLOCK) ON (ia.cd_material = a.cd_material)
 LEFT JOIN ESSUBGRU   i(nolock) ON (i.Cd_grupo    = b.Cd_grupo AND b.Cd_sub_grupo = i.Cd_sub_grupo)
 LEFT JOIN ESGRUPO    j(nolock) ON (j.Cd_grupo    = b.Cd_grupo)
 LEFT JOIN FAPEDIDO   c(nolock) ON (c.cd_pedido   = a.liberacao)
@@ -165,30 +166,3 @@ LEFT  JOIN tesubgrupoproduto tsgp (nolock) ON (tsgp.nome_subgrupo = g.subgrupo_p
 LEFT  JOIN telinhaproduto tlp (nolock)     ON (tlp.linha = g.linha_produto)
 
 WHERE a.dt_programada >='01-01-2016' and a.tipo IN ('CP','DP','DDP','OPL','DCP')
-
-/*SELECT DISTINCT top 5 a.Cd_Especif1
-				, a.Cd_material
-                , ltrim(dbo.cg_fc_monta_descr_ident(':1',substring(i.cd_carac,1,CHARINDEX(';',i.Cd_Carac,2)),0,0,b.campo82,0,' ')) as "Cor"
-                , substring(TRIM(';' FROM substring(i.cd_carac,1,CHARINDEX(';',i.Cd_Carac,2))), 4, LEN(substring(i.cd_carac,1,CHARINDEX(';',i.Cd_Carac,2)))) as "Cor Abre"
-                , 1 as "Count"
-FROM ppident i(nolock)
-LEFT JOIN ESMOVIME a(nolock) ON (i.identificador = a.Cd_Especif1)
-LEFT JOIN ESMATERI b(nolock) ON (a.Cd_material = b.Cd_material)
---LEFT JOIN FAITEMPE   ia(NOLOCK) ON (ia.cd_material = a.cd_material)
-WHERE i.Sequencial = 1
-AND Dt_movimento >= dateadd(m, datediff(m, 0, DATEADD(month , -12 , getdate())), 0)*/
-
-SELECT DISTINCT A.Cd_material, A.Especif1, A.Pr_tabela 
-  FROM FAITEMPE A
-  WHERE A.Cd_material <> '' AND A.Pr_tabela <> ''
-
-  SELECT DISTINCT top 10 a.Cd_Especif1
-				, a.Cd_material
-                , ltrim(dbo.cg_fc_monta_descr_ident(':1',substring(i.cd_carac,1,CHARINDEX(';',i.Cd_Carac,2)),0,0,b.campo82,0,' ')) as "Cor"
-                , substring(TRIM(';' FROM substring(i.cd_carac,1,CHARINDEX(';',i.Cd_Carac,2))), 4, LEN(substring(i.cd_carac,1,CHARINDEX(';',i.Cd_Carac,2)))) as "Cor Abre"
-                , 1 as "Count"
-FROM ppident i(nolock)
-LEFT JOIN ESMOVIME a(nolock) ON (i.identificador = a.Cd_Especif1)
-LEFT JOIN ESMATERI b(nolock) ON (a.Cd_material = b.Cd_material)
-WHERE i.Sequencial = 1
-AND Dt_movimento >= dateadd(m, datediff(m, 0, DATEADD(month , -12 , getdate())), 0)

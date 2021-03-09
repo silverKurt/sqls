@@ -1,0 +1,117 @@
+WITH
+MEMBER [Plano de contas].[- 60 MARGEM DE CONTRIBUIÇÃO] AS
+    NULL
+MEMBER [Plano de contas].[- 61 CUSTOS FIXOS] AS
+    (Aggregate({[Plano de contas].[61 CUSTOS FIXOS]}) * (- 1.0))
+MEMBER [Plano de contas].[- 62 P. E. OPERAC M O D FIXA] AS
+    NULL
+MEMBER [Plano de contas].[- 63 INVESTIMENTOS] AS
+    Aggregate({[Plano de contas].[63 INVESTIMENTOS]})
+MEMBER [Plano de contas].[- 64 RESULTADO APÓS INVESTIMENTOS] AS
+    Aggregate({[Plano de contas].[64 RESULTADO APÓS INVESTIMENTOS]})
+MEMBER [Plano de contas].[- 65 RESULTADO SEM PROVISÕES] AS
+    Aggregate({[Plano de contas].[65 RESULTADO SEM PROVISÕES]})
+MEMBER [Measures].[ REALIZADO] AS
+    Iif(([Plano de contas].CurrentMember.Name = "- 60 MARGEM DE CONTRIBUIÇÃO"), (((((((((((((([Plano de contas].[05 IMPOSTOS S/VENDAS], [Measures].[REALIZADO]) + ([Plano de contas].[25 COMISSÕES], [Measures].[REALIZADO])) + ([Plano de contas].[08 COMPRA DE MATERIAS], [Measures].[REALIZADO])) + ([Plano de contas].[09 (-+) VARIAÇÃO DOS ESTOQUES], [Measures].[REALIZADO])) + ([Plano de contas].[26 PRÊMIOS S/VENDAS], [Measures].[REALIZADO])) + ([Plano de contas].[27 FRETES S/VENDAS], [Measures].[REALIZADO])) + ([Plano de contas].[28 ACORDO COMERCIAL], [Measures].[REALIZADO])) + ([Plano de contas].[30 BONIFICAÇÕES], [Measures].[REALIZADO])) + ([Plano de contas].[37 DEPRECIAÇÕES/AMORTIZAÇÕES - C], [Measures].[REALIZADO])) + ([Plano de contas].[55 PROV. CONTRIB. SOCIAL], [Measures].[REALIZADO])) + ([Plano de contas].[56 PROV. IMPOSTO RENDA], [Measures].[REALIZADO])) / ([Plano de contas].[04 RECEITA BRUTA], [Measures].[REALIZADO])) * 100.0) + 100.0), Iif(([Plano de contas].CurrentMember.Name = "- 62 P. E. OPERAC M O D FIXA"), ((([Plano de contas].[61 CUSTOS FIXOS], [Measures].[ REALIZADO]) / ([Plano de contas].[- 60 MARGEM DE CONTRIBUIÇÃO], [Measures].[ REALIZADO])) * 100.0), [Measures].[REALIZADO])), FORMAT_STRING = "Standard"
+MEMBER [Measures].[ ORCADO] AS
+    Iif(([Plano de contas].CurrentMember.Name = "- 60 MARGEM DE CONTRIBUIÇÃO"), (((((((((((((([Plano de contas].[05 IMPOSTOS S/VENDAS], [Measures].[ORCADO]) + ([Plano de contas].[25 COMISSÕES], [Measures].[ORCADO])) + ([Plano de contas].[08 COMPRA DE MATERIAS], [Measures].[ORCADO])) + ([Plano de contas].[09 (-+) VARIAÇÃO DOS ESTOQUES], [Measures].[ORCADO])) + ([Plano de contas].[26 PRÊMIOS S/VENDAS], [Measures].[ORCADO])) + ([Plano de contas].[27 FRETES S/VENDAS], [Measures].[ORCADO])) + ([Plano de contas].[28 ACORDO COMERCIAL], [Measures].[ORCADO])) + ([Plano de contas].[30 BONIFICAÇÕES], [Measures].[ORCADO])) + ([Plano de contas].[37 DEPRECIAÇÕES/AMORTIZAÇÕES - C], [Measures].[ORCADO])) + ([Plano de contas].[55 PROV. CONTRIB. SOCIAL], [Measures].[ORCADO])) + ([Plano de contas].[56 PROV. IMPOSTO RENDA], [Measures].[ORCADO])) / ([Plano de contas].[04 RECEITA BRUTA], [Measures].[ORCADO])) * 100.0) + 100.0), Iif(([Plano de contas].CurrentMember.Name = "- 62 P. E. OPERAC M O D FIXA"), ((([Plano de contas].[61 CUSTOS FIXOS], [Measures].[ ORCADO]) / ([Plano de contas].[- 60 MARGEM DE CONTRIBUIÇÃO], [Measures].[ ORCADO])) * 100.0), [Measures].[ORCADO])), FORMAT_STRING = "Standard"
+MEMBER [Measures].[ HISTORICO] AS
+    Iif(([Plano de contas].CurrentMember.Name = "- 60 MARGEM DE CONTRIBUIÇÃO"), (((((((((((((([Plano de contas].[05 IMPOSTOS S/VENDAS], [Measures].[HISTORICO]) + ([Plano de contas].[25 COMISSÕES], [Measures].[HISTORICO])) + ([Plano de contas].[08 COMPRA DE MATERIAS], [Measures].[HISTORICO])) + ([Plano de contas].[09 (-+) VARIAÇÃO DOS ESTOQUES], [Measures].[HISTORICO])) + ([Plano de contas].[26 PRÊMIOS S/VENDAS], [Measures].[HISTORICO])) + ([Plano de contas].[27 FRETES S/VENDAS], [Measures].[HISTORICO])) + ([Plano de contas].[28 ACORDO COMERCIAL], [Measures].[HISTORICO])) + ([Plano de contas].[30 BONIFICAÇÕES], [Measures].[HISTORICO])) + ([Plano de contas].[37 DEPRECIAÇÕES/AMORTIZAÇÕES - C], [Measures].[HISTORICO])) + ([Plano de contas].[55 PROV. CONTRIB. SOCIAL], [Measures].[HISTORICO])) + ([Plano de contas].[56 PROV. IMPOSTO RENDA], [Measures].[HISTORICO])) / ([Plano de contas].[04 RECEITA BRUTA], [Measures].[HISTORICO])) * 100.0) + 100.0), Iif(([Plano de contas].CurrentMember.Name = "- 62 P. E. OPERAC M O D FIXA"), ((([Plano de contas].[61 CUSTOS FIXOS], [Measures].[ HISTORICO]) / ([Plano de contas].[- 60 MARGEM DE CONTRIBUIÇÃO], [Measures].[ HISTORICO])) * 100.0), [Measures].[HISTORICO])), FORMAT_STRING = "Standard"
+MEMBER [Measures].[ VAR.R$] AS
+    Iif((([Plano de contas].CurrentMember.Name = "- 60 MARGEM DE CONTRIBUIÇÃO") OR ([Plano de contas].CurrentMember.Name = "- 62 P. E. OPERAC M O D FIXA")), ([Measures].[ REALIZADO] - [Measures].[ ORCADO]), [Measures].[varrsorcreal]), FORMAT_STRING = Iif((([Measures].[ REALIZADO] - [Measures].[ ORCADO]) < 0.0), "|##,#0.00|customCss=color:red\;font-weight:bold\;", "|##,#0.00|customCss=color:green\;font-weight:bold\;")
+MEMBER [Measures].[ VAR.R$ R/H] AS
+    Iif((([Plano de contas].CurrentMember.Name = "- 60 MARGEM DE CONTRIBUIÇÃO") OR ([Plano de contas].CurrentMember.Name = "- 62 P. E. OPERAC M O D FIXA")), ([Measures].[ REALIZADO] - [Measures].[ HISTORICO]), [Measures].[varrsrealhist]), FORMAT_STRING = "Standard"
+MEMBER [Measures].[ VAR.%] AS
+    Iif((([Plano de contas].CurrentMember.Name = "- 60 MARGEM DE CONTRIBUIÇÃO") OR ([Plano de contas].CurrentMember.Name = "- 62 P. E. OPERAC M O D FIXA")), Iif(IsEmpty([Measures].[ ORCADO]), NULL, (([Measures].[ REALIZADO] - [Measures].[ ORCADO]) / [Measures].[ ORCADO])), [Measures].[varpercentb]), FORMAT_STRING = Iif((([Measures].[ REALIZADO] - [Measures].[ ORCADO]) < 0.0), "|0.00%|customCss=color:red\;font-weight:bold\;", "|0.00%|customCss=color:green\;font-weight:bold\;")
+MEMBER [Measures].[ VAR.% R/H] AS
+    Iif((([Plano de contas].CurrentMember.Name = "- 60 MARGEM DE CONTRIBUIÇÃO") OR ([Plano de contas].CurrentMember.Name = "- 62 P. E. OPERAC M O D FIXA")), Iif((IsEmpty([Measures].[ HISTORICO]) OR ([Measures].[ HISTORICO] = 0.0)), NULL, (([Measures].[ REALIZADO] - [Measures].[ HISTORICO]) / [Measures].[ HISTORICO])), [Measures].[varpercentrealhist]), FORMAT_STRING = Iif((([Measures].[ REALIZADO] - [Measures].[ HISTORICO]) < 0.0), "|0.00%|customCss=color:red\;font-weight:bold\;", "|0.00%|customCss=color:green\;font-weight:bold\;")
+MEMBER [Measures].[Orçado Acum] AS
+    Sum(PeriodsToDate([PERIODOANALITICO.(Completo)].[Ano]), [Measures].[ ORCADO])
+MEMBER [Measures].[Realizado Acum] AS
+    Sum(PeriodsToDate([PERIODOANALITICO.(Completo)].[Ano]), [Measures].[ REALIZADO])
+MEMBER [Measures].[Orçado Ano] AS
+    ([PERIODOANALITICO.CurrentYear].item(0.0), [Measures].[ ORCADO])
+MEMBER [Measures].[Orçado Restante] AS
+    ([Measures].[Orçado Ano] - [Measures].[Orçado Acum])
+MEMBER [Measures].[Forecast] AS
+    ([Measures].[Realizado Acum] + [Measures].[Orçado Restante])
+MEMBER [Measures].[Var.R$ Acum] AS
+    ([Measures].[Realizado Acum] - [Measures].[Orçado Acum])
+MEMBER [Measures].[Var.% Acum] AS
+    Iif((([Measures].[Realizado Acum] = 0.0) OR IsEmpty([Measures].[Realizado Acum])), NULL, Iif((([Measures].[Orçado Acum] = 0.0) OR IsEmpty([Measures].[Orçado Acum])), NULL, (([Measures].[Realizado Acum] - [Measures].[Orçado Acum]) / [Measures].[Orçado Acum]))), FORMAT_STRING = Iif((([Measures].[Var.% Acum]) > (0.0)), "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc3\.gif", Iif((([Measures].[Var.% Acum]) = (0.0)), "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc2\.gif", "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc1\.gif"))
+MEMBER [Measures].[Var.R$ For] AS
+    ([Measures].[Forecast] - [Measures].[Orçado Ano])
+MEMBER [Measures].[Var.% For] AS
+    Iif((([Measures].[Forecast] = 0.0) OR IsEmpty([Measures].[Forecast])), NULL, Iif((([Measures].[Orçado Ano] = 0.0) OR IsEmpty([Measures].[Orçado Ano])), NULL, (([Measures].[Forecast] - [Measures].[Orçado Ano]) / [Measures].[Orçado Ano]))), FORMAT_STRING = Iif((([Measures].[Var.% For]) > (0.0)), "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc3\.gif", Iif((([Measures].[Var.% For]) = (0.0)), "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc2\.gif", "|0.00%|image=/resources/images/kpi/Arrow_Status_Asc1\.gif"))
+MEMBER [Measures].[Avo.% Ano] AS
+    Iif((IsEmpty([Measures].[Orçado Ano]) OR ([Measures].[Orçado Ano] = 0.0)), NULL, (([Plano de Contas].[Todos].CurrentMember, [Measures].[Orçado Ano]) / ([Plano de Contas].[04 Receita Bruta], [Measures].[Orçado Ano]))), FORMAT_STRING = "Percent"
+MEMBER [Measures].[Avf.%] AS
+    Iif((IsEmpty([Measures].[Forecast]) OR ([Measures].[Forecast] = 0.0)), NULL, (([Plano de Contas].[Todos].CurrentMember, [Measures].[Forecast]) / ([Plano de Contas].[04 Receita Bruta], [Measures].[Forecast]))), FORMAT_STRING = "Percent"
+SELECT
+{[Measures].[Orçado Acum], [Measures].[Realizado Acum], [Measures].[Var.R$ Acum], [Measures].[Var.% Acum], [Measures].[Orçado Ano], [Measures].[Avo.% Ano], [Measures].[Forecast], [Measures].[Var.R$ For], [Measures].[Var.% For], [Measures].[Avf.%]} ON COLUMNS,
+    {[Plano de contas].[01 FATURAMENTO]
+    , [Plano de contas].[02 (-) IPI E SUBST TRIBUT]
+    , [Plano de contas].[03 (-) DEVOLUÇÃO DE VENDAS]
+    , [Plano de contas].[04 RECEITA BRUTA]
+    , [Plano de contas].[05 IMPOSTOS S/VENDAS]
+    , [Plano de contas].[06 RECEITA LÍQUIDA]
+    , [Plano de contas].[07 CUSTO COM MATERIAIS]
+    , [Plano de contas].[08 COMPRA DE MATERIAS]
+    , [Plano de contas].[09 (-+) VARIAÇÃO DOS ESTOQUES]
+    , [Plano de contas].[10 MARGEM I]
+    , [Plano de contas].[12 DESPESAS C/DIRETORIA INDL]
+    , [Plano de contas].[13 CUSTO PESSOAL DIRETO]
+    , [Plano de contas].[14 CUSTO PESSOAL INDIRETO]
+    , [Plano de contas].[15 DEPRECIAÇÕES/AMORTIZAÇÕES - F]
+    , [Plano de contas].[16 LUZ E FORÇA]
+    , [Plano de contas].[18 GASTOS GERAIS FABRIC]
+    , [Plano de contas].[19 SUBTOTAL CUSTOS DE FABRICAÇÃO]
+    , [Plano de contas].[20 TOTAL CUSTOS DE PRODUÇÃO - CPV]
+    , [Plano de contas].[21 LUCRO BRUTO - MARGEM II]
+    , [Plano de contas].[22 DESPESAS C/PESSOAL VENDAS]
+    , [Plano de contas].[25 COMISSÕES]
+    , [Plano de contas].[26 PRÊMIOS S/VENDAS]
+    , [Plano de contas].[27 FRETES S/VENDAS]
+    , [Plano de contas].[28 ACORDO COMERCIAL]
+    , [Plano de contas].[30 BONIFICAÇÕES]
+    , [Plano de contas].[29 ROYALTIES]
+    , [Plano de contas].[31 FEIRAS E EXPOSIÇÕES]
+    , [Plano de contas].[33 DESP. GERAIS DE MARKETING]
+    , [Plano de contas].[34 PESQUISA E DESENV.]
+    , [Plano de contas].[35 PERDAS NO RECEB CRÉDITO]
+    , [Plano de contas].[36 PROV PERDAS NO RECEB CRÉDITO]
+    , [Plano de contas].[37 DEPRECIAÇÕES/AMORTIZAÇÕES - C]
+    , [Plano de contas].[38 DESP. GERAIS VENDAS]
+    , [Plano de contas].[39 TOTAL DESPESAS COM VENDAS]
+    , [Plano de contas].[40 MARGEM III]
+    , [Plano de contas].[41 DESPESAS C/DIRETORIA]
+    , [Plano de contas].[42 DESPESAS C/PESSOAL]
+    , [Plano de contas].[43 DEPRECIAÇÕES/AMORTIZAÇÕES - A]
+    , [Plano de contas].[44 DESPESAS GERAIS ADM]
+    , [Plano de contas].[45 TOTAL DESPESAS ADMINISTRATIVAS]
+    , [Plano de contas].[46 DESPESAS FINANCEIRAS]
+    , [Plano de contas].[47 VARIAÇÃO CAMBIAL -P]
+    , [Plano de contas].[48 JRS E DESP FINANC. P/INVEST]
+    , [Plano de contas].[49 RECEITAS FINANCEIRAS]
+    , [Plano de contas].[50 VARIAÇÃO CAMBIAL - A]
+    , [Plano de contas].[51 OUTRAS REC. OPERACION.]
+    , [Plano de contas].[52 RESULTADO OPERACIONAL]
+    , [Plano de contas].[54 RESULTADO ANTES IR/CS]
+    , [Plano de contas].[55 PROV. CONTRIB. SOCIAL]
+    , [Plano de contas].[56 PROV. IMPOSTO RENDA]
+    , [Plano de contas].[57 RESULTADO APÓS IR/CSLL]
+    , [Plano de contas].[58 EXCL. DAS DEPRECIAÇÕES]
+    , [Plano de contas].[59 RESULT LIQ ANTES DEPRECIAÇÃO]
+    , [Plano de contas].[- 60 MARGEM DE CONTRIBUIÇÃO]
+    , [Plano de contas].[- 61 CUSTOS FIXOS]
+    , [Plano de contas].[- 62 P. E. OPERAC M O D FIXA]
+    , [Plano de contas].[- 63 INVESTIMENTOS]
+    , [Plano de contas].[- 64 RESULTADO APÓS INVESTIMENTOS]
+    , [Plano de contas].[- 65 RESULTADO SEM PROVISÕES]
+    , [Plano de contas].[90 LOCAÇÕES]
+    , [Plano de contas].[97 COMISSÃO DE INTERMEDIAÇÃO]
+    , [Plano de contas].[99 JUROS S/CAPITAL PRÓPRIO]
+
+} ON ROWS
+FROM [DemonstrativodeResultados]
+WHERE CrossJoin({([ORCAMENTO].[ORÇAMENTO OU 2020 - B])}, [PERIODOANALITICO.LastMonth])

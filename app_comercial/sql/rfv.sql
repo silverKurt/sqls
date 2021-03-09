@@ -124,28 +124,20 @@ SELECT
 		ELSE 'Fora de Faixa'
 	END AS faixa_valor
 
-	, CASE
-		WHEN ((freq.faixa_frequencia = 'F5 - MAIS QUE 100 COMPRAS' OR freq.faixa_frequencia = 'F4 - ENTRE 51 E 100 COMPRAS') AND (rec.faixa_recencia = 'R5 - ATÉ 60 DIAS'))
-		THEN 'Clientes Campeões'
-		WHEN ((freq.faixa_frequencia = 'F3 - ENTRE 31 E 50 COMPRAS' OR freq.faixa_frequencia = 'F2 - ENTRE 11 E 30 COMPRAS') AND (rec.faixa_recencia = 'R5 - ATÉ 60 DIAS' OR rec.faixa_recencia = 'R4 - DE 61 A 120 DIAS'))
-		THEN 'Clientes potencial de lealdade'
-		WHEN ((freq.faixa_frequencia = 'F1 - ATÉ 10 COMPRAS') AND (rec.faixa_recencia = 'R5 - ATÉ 60 DIAS')) --novos
-		THEN 'Clientes Novos'
-		WHEN ((freq.faixa_frequencia = 'F1 - ATÉ 10 COMPRAS') AND (rec.faixa_recencia = 'R4 - DE 61 A 120 DIAS')) --promissores
-		THEN 'Clientes Promissores'
-		WHEN ((freq.faixa_frequencia = 'F5 - MAIS QUE 100 COMPRAS' OR freq.faixa_frequencia = 'F4 - ENTRE 51 E 100 COMPRAS') AND (rec.faixa_recencia = 'R4 - DE 61 A 120 DIAS' OR rec.faixa_recencia = 'R3 - DE 121 A 180 DIAS'))
-		THEN 'Clientes Leais'
-		WHEN ((freq.faixa_frequencia = 'F3 - ENTRE 31 E 50 COMPRAS') AND (rec.faixa_recencia = 'R3 - DE 121 A 180 DIAS')) --atenção
-		THEN 'Clientes Precisam Atenção'
-		WHEN ((freq.faixa_frequencia = 'F1 - ATÉ 10 COMPRAS' OR freq.faixa_frequencia = 'F2 - ENTRE 11 E 30 COMPRAS') AND (rec.faixa_recencia = 'R3 - DE 121 A 180 DIAS'))
-		THEN 'Clientes em pré-hibernação'
-		WHEN ((freq.faixa_frequencia = 'F1 - ATÉ 10 COMPRAS' OR freq.faixa_frequencia = 'F2 - ENTRE 11 E 30 COMPRAS') AND (rec.faixa_recencia = 'R2 - DE 181 A 270 DIAS' OR rec.faixa_recencia = 'R1 - INATIVO'))
-		THEN 'Clientes Hibernando'
-		WHEN ((freq.faixa_frequencia = 'F3 - ENTRE 31 E 50 COMPRAS' OR freq.faixa_frequencia = 'F4 - ENTRE 51 E 100 COMPRAS') AND (rec.faixa_recencia = 'R2 - DE 181 A 270 DIAS' OR rec.faixa_recencia = 'R1 - INATIVO'))
-		THEN 'Clientes em risco'
-		WHEN ((freq.faixa_frequencia = 'F5 - MAIS QUE 100 COMPRAS') AND (rec.faixa_recencia = 'R2 - DE 181 A 270 DIAS' OR rec.faixa_recencia = 'R1 - INATIVO'))
-		THEN 'Clientes não podemos perder'
-		ELSE 'Fora de faixa'
+	, CASE WHEN (freq."faixa_frequencia" IN ('F4 - ENTRE 51 E 100 COMPRAS', 'F5 - MAIS QUE 100 COMPRAS') AND rec."faixa_recencia" IN ('R4 - DE 61 A 120 DIAS', 'R5 - ATÉ 60 DIAS')) THEN 'Cliente Assíduo'
+		   WHEN (freq."faixa_frequencia" = 'F3 - ENTRE 31 E 50 COMPRAS' AND rec."faixa_recencia" = 'R5 - ATÉ 60 DIAS') THEN 'Cliente Assíduo'
+	 	   
+		   WHEN (freq."faixa_frequencia" IN ('F2 - ENTRE 11 E 30 COMPRAS', 'F1 - ATÉ 10 COMPRAS') AND rec."faixa_recencia" IN ('R4 - DE 61 A 120 DIAS', 'R5 - ATÉ 60 DIAS')) THEN 'Cliente Promissor'
+		   WHEN (freq."faixa_frequencia" = 'F3 - ENTRE 31 E 50 COMPRAS' AND rec."faixa_recencia" = 'R4 - DE 61 A 120 DIAS') THEN 'Cliente Promissor'
+	 	   /*CLIENTES LEAIS*/
+		   WHEN rec."faixa_recencia" = 'R3 - DE 121 A 180 DIAS' THEN 'Cliente Leal'
+	  	   /*CLIENTES EM RISCO*/
+		   WHEN (freq."faixa_frequencia" IN ('F2 - ENTRE 11 E 30 COMPRAS', 'F1 - ATÉ 10 COMPRAS') AND rec."faixa_recencia" IN ('R1 - INATIVO', 'R2 - DE 181 A 270 DIAS')) THEN 'Cliente Risco'
+		   WHEN (freq."faixa_frequencia" = 'F3 - ENTRE 31 E 50 COMPRAS' AND rec."faixa_recencia" = 'R2 - DE 181 A 270 DIAS') THEN 'Cliente Risco'
+	 	   /*CLIENTES QUE NÃO PODEMOS PERDER*/
+		   WHEN (freq."faixa_frequencia" IN ('F4 - ENTRE 51 E 100 COMPRAS', 'F4 - ENTRE 51 E 100 COMPRAS') AND rec."faixa_recencia" IN ('R1 - INATIVO', 'R2 - DE 181 A 270 DIAS')) THEN 'Cliente Não Podemos Perder'
+		   WHEN (freq."faixa_frequencia" = 'F3 - ENTRE 31 E 50 COMPRAS' AND rec."faixa_recencia" = 'R1 - INATIVO') THEN 'Cliente Não Podemos Perder'
+	 	   ELSE 'FORA DA FAIXA'
 	END AS faixa_rfv
 
 	, f.cod_cliente AS qtd_clientes
