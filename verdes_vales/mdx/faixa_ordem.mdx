@@ -1,0 +1,43 @@
+WITH
+MEMBER [Measures].[vlr_servicos] AS
+    ([Origem].[SERVIÇOS], [Measures].[vlrtotalos]), $caption = "Valor de Serviços", FORMAT_STRING = 
+    iif([faixadiasos].CurrentMember.Name = "MAIS DE 60 DIAS", "|R$#,##0.00|customCss=background-color:\#EB354D\;color:\#FFFFFF", 
+        iif([faixadiasos].CurrentMember.Name = "DE 11 ATÉ 59 DIAS", "|R$#,##0.00|customCss=background-color:\#FEC447\;color:\#FFFFFF", 
+            iif([faixadiasos].CurrentMember.Name = "ATÉ 10 DIAS", "|R$#,##0.00|customCss=background-color:\#269C59\;color:\#FFFFFF", 
+                "|R$#,##0.00|customCss=background-color:\#3BA47D\;color:\#FFFFFF"
+            )
+        )
+    )
+MEMBER [Measures].[vlr_pecas] AS
+    ([Origem].[PEÇAS], [Measures].[vlrtotalos]), $caption = "Valor de Peças", FORMAT_STRING = 
+    iif(([faixadiasos].CurrentMember.Name) = "MAIS DE 60 DIAS", "|R$#,##0.00|customCss=background-color:\#EB354D\;color:\#FFFFFF", 
+        iif(([faixadiasos].CurrentMember.Name) = "DE 11 ATÉ 59 DIAS", "|R$#,##0.00|customCss=background-color:\#FEC447\;color:\#FFFFFF", 
+            iif(([faixadiasos].CurrentMember.Name) = "ATÉ 10 DIAS", "|R$#,##0.00|customCss=background-color:\#269C59\;color:\#FFFFFF", 
+                "|R$#,##0.00|customCss=background-color:\#3BA47D\;color:\#FFFFFF"
+            )
+        )
+    )
+
+MEMBER [Measures].[total] AS
+   ([Measures].[vlr_servicos] + [Measures].[vlr_pecas]), $caption = "Total", FORMAT_STRING = 
+    iif([faixadiasos].CurrentMember.Name = "MAIS DE 60 DIAS", "|R$#,##0.00|customCss=background-color:\#EB354D\;color:\#FFFFFF", 
+        iif([faixadiasos].CurrentMember.Name = "DE 11 ATÉ 59 DIAS", "|R$#,##0.00|customCss=background-color:\#FEC447\;color:\#FFFFFF", 
+            iif([faixadiasos].CurrentMember.Name = "ATÉ 10 DIAS", "|R$#,##0.00|customCss=background-color:\#269C59\;color:\#FFFFFF", 
+                "|R$#,##0.00|customCss=background-color:\#3BA47D\;color:\#FFFFFF"
+            )
+        )
+    )
+
+MEMBER [Measures].[qtdos2] AS 
+    ([Measures].[qtdos]), $caption = "Qtd. de OS", FORMAT_STRING = 
+    iif([faixadiasos].CurrentMember.Name = "MAIS DE 60 DIAS", "|0|customCss=background-color:\#EB354D\;color:\#FFFFFF", 
+        iif([faixadiasos].CurrentMember.Name = "DE 11 ATÉ 59 DIAS", "|0|customCss=background-color:\#FEC447\;color:\#FFFFFF", 
+            iif([faixadiasos].CurrentMember.Name = "ATÉ 10 DIAS", "|0|customCss=background-color:\#269C59\;color:\#FFFFFF", 
+                "|0|customCss=background-color:\#3BA47D\;color:\#FFFFFF"
+            )
+        )
+    )
+SELECT
+NON EMPTY {[Measures].[qtdos2], [Measures].[vlr_servicos], [Measures].[vlr_pecas], [Measures].[total]} ON COLUMNS,
+NON EMPTY [faixadiasos].[Todos].Children ON ROWS
+FROM [ServicosxPecas]

@@ -1,0 +1,22 @@
+
+WITH
+MEMBER [SituacaoBaixa].[AVencerAtrasado] AS
+    Aggregate({[SituacaoBaixa].[A VENCER], [SituacaoBaixa].[VENCE HOJE], [SituacaoBaixa].[ATRASADO]})
+
+MEMBER [Measures].[vlr_a_receber] AS
+    ([SituacaoBaixa].[AVencerAtrasado], [PAGARRECEBER].[R], [Measures].[vlrpagrec]), FORMAT_STRING = "|R$#,##0.00|customCss=color:\#7aafff", $caption = "Vlr. a Receber"
+
+MEMBER [Measures].[vlr_a_pagar] AS
+    ((- 1.0) * ([SituacaoBaixa].[AVencerAtrasado], [PAGARRECEBER].[P], [Measures].[vlrpagrec])), FORMAT_STRING = Iif((([Measures].[A Pagar]) >= (0.0)), "|R$#,##0.00|customCss=color:\#eb2d46", "|R$#,##0.00|customCss=color:\#eb2d46"), $caption = "Vlr. a Pagar"
+
+MEMBER [Measures].[initial_balance] AS
+    iif(isEmpty([Measures].[saldo]), (ParallelPeriod([periodo.(Dia)].[Dia], 1, [periodo.(Dia)].CurrentMember), [Measures].[projected_balance]), [Measures].[saldo]), FORMAT_STRING = Iif((([Measures].[initial_balance]) > (0.0)), "|R$#,##0.00|customCss=color:\#28ca6e", "|R$#,##0.00|customCss=color:\#eb2d46"), $caption = "Saldo Corrente"
+
+MEMBER [Measures].[projected_balance] AS
+    ((([Measures].[vlr_a_pagar] + [Measures].[vlr_a_receber]) + [Measures].[projecaovenda]) + [Measures].[initial_balance]), FORMAT_STRING = Iif((([Measures].[projected_balance]) > (0.0)), "|R$#,##0.00|customCss=color:\#28ca6e", "|R$#,##0.00|customCss=color:\#eb2d46"), $caption = "Saldo Projetado"
+
+SELECT
+NON EMPTY {[Measures].[initial_balance], [Measures].[vlr_a_pagar], [Measures].[vlr_a_receber], [Measures].[projecaovenda], [Measures].[projected_balance]} ON COLUMNS,
+NON EMPTY Filter([periodo.(Dia)].[Todos].Children, [Measures].[initial_balance] <> [Measures].[projected_balance]) ON ROWS
+FROM [Fluxoprojetado]
+WHERE {([BIMFperiodo.(Completo)].[Dia].[06/04/2021] : [BIMFperiodo.(Completo)].[Dia].[05/07/2021])}

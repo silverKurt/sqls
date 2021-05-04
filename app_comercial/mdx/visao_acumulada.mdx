@@ -1,0 +1,32 @@
+WITH
+MEMBER [Measures].[meta_acumulada] AS
+    Aggregate(PeriodsToDate([data.(DiaMes)].[Todos]), [Measures].[meta]), $caption = "Meta de Fat. Acumulada"
+MEMBER [Measures].[fat_acumulado_external_value] AS
+    iif(NOT IsEmpty([Measures].[faturamento]), Aggregate(PeriodsToDate([data.(DiaMes)].[Todos]), [Measures].[faturamento]), NULL), $caption = "Faturamento Acumulado"
+MEMBER [Measures].[fat_acumulado_internal_value] AS
+    Aggregate(PeriodsToDate([data.(DiaMes)].[Todos]), [Measures].[faturamento])
+MEMBER [Measures].[ten_acumulada] AS
+    (([Measures].[fat_acumulado_internal_value] / [Measures].[rank]) * [Measures].[diasuteismes]), $caption = "Tendência Acumulada"
+MEMBER [Measures].[rank] AS
+    Iif(([Measures].[fat_acumulado_internal_value] <> 0.0), Rank([data.(DiaMes)].CurrentMember, Filter(Order([data.(DiaMes)].[Todos].Children, [Measures].[fat_acumulado_internal_value], ASC), (NOT IsEmpty([Measures].[meta])))), NULL), Format_String = "Standard", $caption = "Rank Atual"
+MEMBER [Measures].[faturamento_ma] AS
+    Aggregate({(FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1.0, [BIMFdata.CurrentMonth].Item(0.0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1.0, [BIMFdata.CurrentMonth].Item(0.0)))}, [Measures].[faturamento]), FORMAT_STRING = "Currency", $caption = "Faturamento do Mês Anterior"
+MEMBER [Measures].[faturamento_aa] AS
+    Aggregate({(FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1.0, [BIMFdata.CurrentMonth].Item(0.0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1.0, [BIMFdata.CurrentMonth].Item(0.0)))}, [Measures].[faturamento]), FORMAT_STRING = "Currency", $caption = "Faturamento do Ano Anterior"
+MEMBER [Measures].[variacao_fat_anual] AS
+    Iif(([Measures].[faturamento_aa] > 0.0), (([Measures].[faturamento] / [Measures].[faturamento_aa]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[faturamento_aa] > 0.0), Iif(([Measures].[variacao_fat_anual] <= 0.0), "|0.00%|style=red", Iif(([Measures].[variacao_fat_anual] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Variação de Fat. Anual"
+MEMBER [Measures].[variacao_fat_mensal] AS
+    iif(([Measures].[faturamento_ma] > 0.0), (([Measures].[faturamento] / [Measures].[faturamento_ma]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[faturamento_ma] > 0.0), Iif(([Measures].[var_fat_mensal] <= 0.0), "|0.00%|style=red", Iif(([Measures].[var_fat_mensal] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Variação de Fat. Mensal"
+MEMBER [Measures].[volume_ma] AS
+    Aggregate({(FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1.0, [BIMFdata.CurrentMonth].Item(0.0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Mes], 1.0, [BIMFdata.CurrentMonth].Item(0.0)))}, [Measures].[volume]), FORMAT_STRING = "#,##0.00", $caption = "Volume do Mês Anterior"
+MEMBER [Measures].[volume_aa] AS
+    Aggregate({(FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1.0, [BIMFdata.CurrentMonth].Item(0.0)) : FixedParallelPeriod([BIMFdata.(Completo)].[Ano], 1.0, [BIMFdata.CurrentMonth].Item(0.0)))}, [Measures].[volume]), FORMAT_STRING = "#,##0.00", $caption = "Volume do Ano Anterior"
+MEMBER [Measures].[variacao_vol_anual] AS
+    iif(([Measures].[volume_aa] > 0.0), (([Measures].[volume] / [Measures].[volume_aa]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[volume_aa] > 0.0), Iif(([Measures].[variacao_vol_anual] <= 0.0), "|0.00%|style=red", Iif(([Measures].[variacao_vol_anual] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Variação de Vol. Anual"
+MEMBER [Measures].[variacao_vol_mensal] AS
+    iif(([Measures].[volume_ma] > 0.0), (([Measures].[volume] / [Measures].[volume_ma]) - 1.0), NULL), FORMAT_STRING = Iif(([Measures].[volume_ma] > 0.0), Iif(([Measures].[variacao_vol_mensal] <= 0.0), "|0.00%|style=red", Iif(([Measures].[variacao_vol_mensal] > 1.0), "|0.00%|style=green", "|0.00%|style=yellow")), NULL), $caption = "Variação de Vol. Mensal"
+SELECT
+NON EMPTY {[Measures].[fat_acumulado_external_value], [Measures].[meta_acumulada], [Measures].[ten_acumulada]} ON COLUMNS,
+NON EMPTY Filter({[data.(DiaMes)].[Todos].Children}, ((NOT IsEmpty([Measures].[meta])))) ON ROWS
+FROM [FaturamentoxMetas]
+WHERE {([BIMFdata.CurrentMonth])}

@@ -1,0 +1,66 @@
+
+WITH
+MEMBER [SituacaoBaixa].[AVencerAtrasado] AS
+    Aggregate({[SituacaoBaixa].[A VENCER], [SituacaoBaixa].[VENCE HOJE], [SituacaoBaixa].[ATRASADO]})
+
+MEMBER [Measures].[vlr_a_receber] AS
+    ([SituacaoBaixa].[AVencerAtrasado], [PAGARRECEBER].[R], [Measures].[vlrpagrec]), FORMAT_STRING = "|R$#,##0.00|customCss=color:\#7aafff", $caption = "Vlr. a Receber"
+
+MEMBER [Measures].[vlr_a_pagar] AS
+    ((- 1.0) * ([SituacaoBaixa].[AVencerAtrasado], [PAGARRECEBER].[P], [Measures].[vlrpagrec])), FORMAT_STRING = Iif((([Measures].[A Pagar]) >= (0.0)), "|R$#,##0.00|customCss=color:\#eb2d46", "|R$#,##0.00|customCss=color:\#eb2d46"), $caption = "Vlr. a Pagar"
+
+MEMBER [Measures].[initial_balance] AS
+    iif(isEmpty([Measures].[saldo]), (ParallelPeriod([periodo.(Dia)].[Dia], 1, [periodo.(Dia)].CurrentMember), [Measures].[projected_balance]), [Measures].[saldo]), FORMAT_STRING = Iif((([Measures].[initial_balance]) > (0.0)), "|R$#,##0.00|customCss=color:\#28ca6e", "|R$#,##0.00|customCss=color:\#eb2d46"), $caption = "Saldo Corrente"
+
+MEMBER [Measures].[projected_balance] AS
+    ((([Measures].[vlr_a_pagar] + [Measures].[vlr_a_receber]) + [Measures].[projecaovenda]) + [Measures].[initial_balance]), FORMAT_STRING = Iif((([Measures].[projected_balance]) > (0.0)), "|R$#,##0.00|customCss=color:\#28ca6e", "|R$#,##0.00|customCss=color:\#eb2d46"), $caption = "Saldo Projetado"
+
+MEMBER [Measures].[Acima] AS
+    iif(([Measures].[projected_balance] > 0.0), [Measures].[projected_balance], NULL)
+MEMBER [Measures].[Abaixo] AS
+    iif(([Measures].[projected_balance] < 0.0), [Measures].[projected_balance], NULL)
+
+
+SELECT
+NON EMPTY {[Measures].[initial_balance], [Measures].[vlr_a_pagar], [Measures].[vlr_a_receber], [Measures].[projecaovenda], [Measures].[projected_balance], [Measures].[Acima], [Measures].[Abaixo]} ON COLUMNS,
+NON EMPTY [periodo.(Dia)].[Todos].Children ON ROWS
+FROM [Fluxoprojetado]
+WHERE {([BIMFperiodo.(Completo)].[Dia].[06/04/2021] : [BIMFperiodo.(Completo)].[Dia].[06/05/2021])}
+
+MEMBER [Measures].[__A1] AS
+    Rank([categoria].CurrentMember, Order([categoria].[Todos].Children, [Measures].[vlrpagrec], BDESC))
+MEMBER [Measures].[__A2] AS
+    Sum(Head(Order([categoria].[Todos].Children, [Measures].[vlrpagrec], BDESC), [Measures].[__A1]), [Measures].[vlrpagrec]), $visible = "false"
+
+MEMBER [Measures].[next_value] AS
+    Aggregate(Head(Order([produto].[Todos].Children, [Measures].[share], BDESC), ([Measures].[rank])), [Measures].[share]), Format_String = Iif(([Measures].[next_value] <= 0.7), "|0.00%|style=green", Iif(([Measures].[next_value] < 0.9), "|0.00%|style=yellow", "|0.00%|style=red"))
+
+
+WITH
+MEMBER [Measures].[Liberação] AS
+    [Measures].[QtdUVsPedido]
+MEMBER [Measures].[Participação] AS
+    ([Measures].[Liberação] / ([RazaoSocial].[Todos], [Measures].[Liberação])), Format_String = "Percent"
+MEMBER [Measures].[Part. AA] AS
+    ([Measures].[Lib A.A.] / ([RazaoSocial].[Todos], [Measures].[Lib A.A.])), Format_String = "Percent"
+MEMBER [Measures].[% Var.] AS
+    Iif(IsEmpty([Measures].[Lib A.A.]), NULL, (([Measures].[Liberação] / [Measures].[Lib A.A.]) - 1.0)), Format_String = Iif(([Measures].[% Var.] >= 0.0), "|0.00%|arrow=up", "|0.00%|arrow=down")
+MEMBER [Measures].[Variação] AS
+    Iif(IsEmpty([Measures].[Lib A.A.]), NULL, ([Measures].[Liberação] - [Measures].[Lib A.A.])), Format_String = "Standard"
+MEMBER [Measures].[Ranking Atual] AS
+    Iif(([Measures].[Liberação] > 0.0), Rank([RazaoSocial].CurrentMember, Order([RazaoSocial].[Todos].Children, [Measures].[Liberação], BDESC)), NULL), Format_String = "Standard"
+MEMBER [Measures].[ABC Atual] AS
+    Sum(Head(Order([RazaoSocial].[Todos].Children, [Measures].[Liberação], BDESC), [Measures].[Ranking Atual]), [Measures].[Liberação])
+MEMBER [Measures].[% ABC] AS
+    ([Measures].[ABC Atual] / ([RazaoSocial].[Todos], [Measures].[Liberação])), Format_String = Iif(([Measures].[% ABC] <= 0.7), "|0.00%|style=green", Iif(([Measures].[% ABC] < 0.9), "|0.00%|style=yellow", "|0.00%|style=red"))
+MEMBER [Measures].[Lib A.A.] AS
+    Aggregate({(FixedParallelPeriod([DtNotaFiscalFiltro.(Completo)].[Ano], 1.0, [DtNotaFiscalFiltro.CurrentMonth].Item(0.0)) : FixedParallelPeriod([DtNotaFiscalFiltro.(Completo)].[Ano], 1.0, Tail([DtNotaFiscalFiltro.CurrentMonth], 1.0).Item(0.0)))}, [Measures].[QtdUVsPedido]), $caption = "Lib A.A."
+MEMBER [Measures].[Fat A.A.] AS
+    Aggregate({(FixedParallelPeriod([DtNotaFiscalFiltro.(Completo)].[Ano], 1.0, [DtNotaFiscalFiltro.CurrentMonth].Item(0.0)) : FixedParallelPeriod([DtNotaFiscalFiltro.(Completo)].[Ano], 1.0, Tail([DtNotaFiscalFiltro.CurrentMonth], 1.0).Item(0.0)))}, [Measures].[VlTotNotaFiscal]), $caption = "Fat A.A."
+MEMBER [Measures].[% Atingimento] AS
+    Iif((([Measures].[MetaLoja] > 0.0) AND ([Measures].[Liberação] > 0.0)), ([Measures].[Liberação] / [Measures].[MetaLoja]), NULL), Format_String = "Percent"
+SELECT
+NON EMPTY {[Measures].[MetaLoja], [Measures].[Liberação], [Measures].[% Atingimento], [Measures].[Participação], [Measures].[Lib A.A.], [Measures].[Part. AA], [Measures].[% Var.], [Measures].[Variação], [Measures].[Ranking Atual], [Measures].[% ABC]} ON COLUMNS,
+NON EMPTY Order(Filter([RazaoSocial].[Todos].Children, ([Measures].[Liberação] > 0.0)), [Measures].[Liberação], DESC) ON ROWS
+FROM [ABCLojas]
+WHERE CrossJoin(CrossJoin({[CodRegiao].[REGIAO 01], [CodRegiao].[REGIAO 02], [CodRegiao].[REGIAO 03], [CodRegiao].[REGIAO 04], [CodRegiao].[REGIAO 05], [CodRegiao].[REGIAO 06], [CodRegiao].[REGIAO 07], [CodRegiao].[REGIAO 08], [CodRegiao].[REGIAO 11]}, {([ConsFaturamento].[SIM])}), [DtNotaFiscalFiltro.CurrentMonth])

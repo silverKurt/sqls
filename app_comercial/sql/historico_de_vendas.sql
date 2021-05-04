@@ -45,7 +45,7 @@ ORDER BY 1,2
    	    , CAST(DATE_TRUNC('MONTH', CAST("data_cadastro" AS DATE)) AS DATE)      AS "data_cadastro"
         , CAST(GENERATE_SERIES(
       	    CAST(DATE_TRUNC('MONTH', CAST("data_cadastro" AS DATE)) AS DATE), 
-            COALESCE(DATE_TRUNC('MONTH', CAST("data_inativacao" AS DATE))::DATE, NOW()::DATE), 
+            DATE_TRUNC('MONTH', COALESCE((CASE WHEN "data_inativacao"::TEXT = '' THEN NULL ELSE "data_inativacao" END), NOW()::DATE::TEXT)::DATE), 
             '1 MONTH'::INTERVAL
         ) AS DATE)                                                              AS "data"
     FROM "appgestaocomercialv3"."fat_appgestaocomercialv3_CadastrodeClientes"
@@ -91,11 +91,9 @@ ORDER BY 1,2
         , CAST(cc."segmento_cliente" AS TEXT)                               AS "segmento_cliente"
         , CAST(cc."email" AS TEXT)                                          AS "email"
         , CAST(cc."telefone" AS TEXT)                                       AS "telefone"
-        , CAST(cc."cod_representante" AS TEXT)                              AS "cod_representante"
-        , CAST(r."representante" AS TEXT)                                   AS "representante"
+        --, CAST(r."representante" AS TEXT)                                   AS "representante"
         , CAST(cc."regiao" AS TEXT)                                         AS "regiao"
     FROM "appgestaocomercialv3"."fat_appgestaocomercialv3_CadastrodeClientes" cc
-    LEFT JOIN representantes r ON (CAST(cc."cod_representante" AS TEXT) = CAST(r."cod_representante" AS TEXT))
 )
 SELECT 
     CAST(cc."linha_tempo_cad" AS DATE)                                      AS "data"
@@ -108,8 +106,9 @@ SELECT
     , CAST(c."bairro" AS TEXT)                                              AS "bairro"
     , CAST(c."endereco" AS TEXT)                                            AS "endereco"
     , CAST(c."segmento_cliente" AS TEXT)                                    AS "segmento_cliente"
-    , CAST(c."cod_representante" AS TEXT)                                   AS "cod_representante"
-    , CAST(c."representante" AS TEXT)                                       AS "representante"
+    , CAST(fb."cod_representante" AS TEXT)                                  AS "cod_representante"
+    , CAST(fb."representante" AS TEXT)                                      AS "representante"
+    , CAST(fb."empresa" AS TEXT)                                            AS "empresa"
     , CAST(c."regiao" AS TEXT)                                              AS "regiao"
     , CASE WHEN SUM(CAST("faturamento" AS DOUBLE PRECISION)) IS NULL THEN 0 ELSE SUM(CASE WHEN CAST("tipo_faturamento" AS TEXT) = 'VENDA' THEN CAST("faturamento" AS DOUBLE PRECISION) ELSE NULL END) END AS "faturamento" 
     , CASE WHEN SUM(CAST("faturamento" AS DOUBLE PRECISION)) IS NULL THEN 'NÃO' ELSE 'SIM' END AS "houve_faturamento" 
@@ -117,4 +116,4 @@ FROM classificacao_clientes cc
 LEFT JOIN clientes c ON (c."cod_cliente" = cc."cod_cliente")
 LEFT JOIN "appgestaocomercialv3"."fat_appgestaocomercialv3_FaturamentoBase" fb ON (c."cod_cliente" = fb."cod_cliente" AND DATE_TRUNC('MONTH', fb."data") = cc."linha_tempo_cad")
 --WHERE CAST(cc."linha_tempo_cad" AS DATE) >= '2020-01-01'
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14

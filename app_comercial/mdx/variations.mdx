@@ -482,7 +482,81 @@ Este indicadores colocam a média de quantos produtos acabam sendo vendidos por 
 
 A margem gerencial corresponde ao valor de lucratividade bruta, ao considerar o total faturado e retirar os custos totais e descontos deste valor.
 
+
+
 1/1 65/1 (considerar somente quantidade)
 
 se o horário que o almoço começou for menor do que a data de fim do último pdv então é ignorado e seguido a regra
 
+SELECT 
+        DATA_FATURA                 AS "data_fatura"
+        , DATA_META                 AS "data_meta"
+        , CFOP                      AS "cfop"
+        , NOME_VENDEDOR             AS "nome_vendedor"
+        , NOME_CLIENTE              AS "nome_cliente"
+        , PAIS_CLIENTE              AS "pais_cliente"
+        , ESTADO_CLIENTE            AS "estado_cliente"
+        , CIDADE_CLIENTE            AS "cidade_cliente"
+        , GEO_CLIENTE               AS "geo_cliente"
+        , SUBGRUPO_PRODUTO          AS "grupo_produto"
+        , SUBGRUPO_PRODUTO          AS "subgrupo_produto" 
+        , LINHA_PRODUTO             AS "linha_produto"
+        , MARCA_PRODUTO             AS "marca_produto"    
+        , FAMILIA_PRODUTO           AS "familia_produto"
+        , PRODUTO                   AS "produto"
+        , COD_PRODUTO               AS "cod_produto"
+        , CASE WHEN TIPO_CLIENTE = 'C' THEN 'CLIENTE'
+               WHEN TIPO_CLIENTE = 'F' THEN 'FORNECEDOR'
+               WHEN TIPO_CLIENTE = 'R' THEN 'REPRESENTANTE'
+               WHEN TIPO_CLIENTE = 'T' THEN 'TRANSPORTADORA'
+               ELSE 'NÃO MAPEADO'
+        END AS "tipo_cliente"
+        , TIPO_FATURAMENTO          AS "tipo_faturamento"
+        , COD_FILIAL                AS "cod_filial"
+        , NOME_FILIAL               AS "nome_filial"
+        , CEP_CLIENTE               AS "cep_cliente"
+        , COD_SUPERVISOR            AS "cod_supervisor"
+        , NOME_SUPERVISOR           AS "nome_supervisor"
+        , TIPO_VENDEDOR             AS "tipo_vendedor"
+        , NUMERO_DOCUMENTO          AS "numero_documento"
+        , NUMERO_NOTA               AS "numero_nota"
+        , COD_VENDEDOR              AS "cod_vendedor"
+        , COD_CLIENTE               AS "cod_cliente"
+        , QUANTIDADE_VENDIDA        AS "quantidade_vendida"
+        , LITROS_VENDIDOS           AS "litros_vendidos"
+        , KILOS_VENDIDOS            AS "kilos_vendidos"
+        , VALOR_TOTAL_PRODUTO       AS "valor_total_produto"
+        , VALOR_ACRESCIMO_PRODUTO   AS "valor_acrescimo_produto"
+        , CUSTO_TOTAL_PRODUTO       AS "custo_total_produto"
+        , PRECO_PRODUTO             AS "preco_produto"
+        , VALOR_DESCONTO_FATURA     AS "valor_desconto_fatura"
+        , VALOR_FRETE_FATURA        AS "valor_frete_fatura"
+        , VALOR_VENDA_LIQUIDA       AS "valor_venda_liquida"
+        , VALOR_MARGEM_GERENCIAL    AS "valor_margem_gerencial"
+        , VALOR_MARGEM_CONTRIBUICAO AS "valor_margem"
+        
+FROM VW_FATURAMENTO_BIMACHINE
+WHERE COD_CLIENTE NOT IN ('26', '21')
+--AND DATA_FATURA >= '2021-01-01'
+
+KPI: % Margem (faturamento produto)
+KPI: % Margem  AA (faturamento produto)
+KPI: Variação ao AA % Margem (faturamento produto)
+Mini chart: % Margem (faturamento produto)
+
+% de Margem Gerencial
+A margem gerencial é calculado pelo valor de margem gerencial sobre o valor bruto faturado.
+
+[Measures].[margem_contrib_AA]/[Measures].[VlrAA]
+
+<#if filters['Periodo']??>
+   Aggregate({FixedParallelPeriod([BIMFperiodo.(Completo)].[Ano], 1, ${filters['Periodo'].first}.Item(0)) : FixedParallelPeriod([BIMFperiodo.(Completo)].[Ano], 1, ${filters['Periodo'].last}.Item(0))}, [Measures].[PercMargem])
+<#else>
+   Iif(IsEmpty([Measures].[PercMargem]), NULL, 0)
+</#if>
+
+jdbc:postgresql://gix.renacortintas.com.br:6432/DW	
+jdbc:postgresql://gix.renacortintas.com.br:5432/GIX	
+
+bimachine
+bim4ch1n3

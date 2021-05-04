@@ -3,6 +3,20 @@
   FROM ESMOVIME a (nolock) WHERE a.Dt_movimento >= CAST(DATEADD(dd, -DAY(GETDATE())+1, GETDATE()) AS DATE)
 )
 
+, produtos_ativos as (
+  
+  select distinct
+       es.Cd_material as 'Cod Material',
+       es.Cd_especif1 as 'Cod Cor'
+from  ESESTOQU es(nolock)
+inner join ESMATERI ma (nolock) ON es.Cd_material = ma.Cd_material
+inner join PPCACONF conf (nolock) ON ma.Campo82 = conf.Configurador
+inner join PPCCARAC ca (nolock) ON conf.Cd_caract = ca.Cd_caract
+where ca.Ativo = '1' and ma.Tipo = 'A'
+  
+)
+  
+
 , estoque AS 
 (SELECT DISTINCT
         
@@ -110,10 +124,12 @@ LEFT JOIN geelemen   tg950(nolock) ON (a.Cd_material = tg950.Elemento and tg950.
 
 LEFT  JOIN tesubgrupoproduto tsgp (nolock) ON (tsgp.nome_subgrupo = g.subgrupo_produto)
 LEFT  JOIN telinhaproduto tlp (nolock)     ON (tlp.linha = g.linha_produto)
-WHERE b.Tipo = 'A'
+
+ 
 )
 
 SELECT 
         * 
 FROM estoque 
 INNER JOIN periodos on 1=1
+WHERE estoque.cd_material IN (SELECT "Cod Material" FROM produtos_ativos)

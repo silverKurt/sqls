@@ -1,0 +1,32 @@
+Indicadores de variação de faturamento que comparam o valor faturado do intervalo da data filtrada com o mês anterior e ano anterior.
+
+
+Exemplo: Mês Anterior
+
+
+Ao filtrar Janeiro de 2021, o indicador irá consultar Dezembro de 2020 e aplicar a seguinte fórmula: (Janeiro de 2021 / Dezembro de 2020) - 1.
+
+
+Exemplo: Ano Anterior
+
+
+Ao filtrar Janeiro de 2021, o indicador irá consultar Janeiro de 2020 e aplicar a seguinte fórmula: (Janeiro de 2021 / Janeiro de 2020) - 1.
+
+
+OBS: A operação de -1 apresentado na fórmula tem como objetivo informar a variação do valor, tomando o período anterior como o valor de atingimento ou "meta" e verificando o quanto falta para atingi-la através da aplicação cálculo.
+
+
+E quanto falta para a atingirmos?
+
+Os indicadores a seguir apontam o valor que ainda é necessário ser percorrido para que possamos atingir o nosso valor ideal de faturamento, conforme nossa meta mensal. O cálculo destes indicadores acontece da seguinte forma:
+
+
+Até hoje: realizamos a soma do faturamento até o dia atual e diminuímos a soma da meta diária até o dia atual.
+
+
+Até o final do mês: realizamos a soma do faturamento já cadastrado no sistema e diminuímos a soma da meta diária até o final do mês.
+
+
+E comparando com as metas?
+
+Estes indicadores tem como objetivo apresentar o atingimento da meta e o seu valor. A forma como o atingimento é calculado, é consultando a faturamento da data  filtrada e o dividindo pela meta da mesma periodicidade.

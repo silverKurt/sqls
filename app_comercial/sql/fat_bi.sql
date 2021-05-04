@@ -1,0 +1,30 @@
+-- Source: faturamento_comercial
+SELECT 
+	CAST("supervisor" AS TEXT) 
+	, CAST("marca_produto" AS TEXT)
+	, CAST("cod_produto" AS TEXT) 
+	, CAST("tipo_faturamento" AS TEXT)
+	, CAST("subgrupo_produto" AS TEXT)
+	, CAST("cod_cliente" AS TEXT)
+	, CAST("empresa" AS TEXT)
+	, CAST("cfop" AS TEXT)
+	, CAST("data" AS DATE) 
+	, CAST("cod_empresa" AS TEXT)
+	, CAST("pais" AS TEXT)
+	, CAST("produto" AS TEXT) 
+	, CAST("cod_supervisor" AS TEXT) 
+	, CAST("cep" AS TEXT) 
+	, CAST("cod_representante" AS TEXT)
+	, CAST("estado" AS TEXT)
+	, CAST("geo" AS TEXT) 
+	, CAST("grupo_produto" AS TEXT)
+	, CAST("cidade" AS TEXT) 
+	, CAST("nota_fiscal" AS TEXT) 
+	, CAST("representante" AS TEXT)
+	, CAST("cliente" AS TEXT) 
+	, CAST("qtd" AS DOUBLE PRECISION)
+	, CAST("volume" AS DOUBLE PRECISION) 
+	, CAST("faturamento" AS DOUBLE PRECISION)  
+FROM "dadosparaapp"."fat_dadosparaapp_faturamentocomercial"
+
+
